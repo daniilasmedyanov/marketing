@@ -42,12 +42,12 @@
   .topbar{
     background:var(--surface); border-bottom:1px solid var(--line);
     padding:0 clamp(16px,4vw,40px); height:60px;
-    display:flex; align-items:center; justify-content:space-between;
+    display:flex; align-items:center; gap:14px;
     position:sticky; top:0; z-index:10;
   }
   .logo{display:flex;align-items:center;text-decoration:none}
   .logo svg{height:26px;width:auto;display:block}
-  .topnav{display:flex;align-items:center;gap:6px}
+  .topnav{display:flex;align-items:center;gap:6px;margin-right:auto}
   .topnav a{font-size:13px;font-weight:600;color:var(--ink-3);text-decoration:none;padding:7px 12px;border-radius:9px;transition:.16s}
   .topnav a:hover{background:var(--bg);color:var(--ink-2)}
   .topnav a.active{background:var(--blue-soft);color:var(--blue)}
@@ -299,26 +299,13 @@
       </table>
     </div>
 
-    <!-- ряд 3: источники лидов + последние лиды -->
-    <div class="row">
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Лиды</h2>
-          <span class="hint">последние сделки</span>
-        </div>
-        <table class="lead-table">
-          <thead><tr><th>Клиент</th><th>Источник</th><th style="text-align:right">Статус</th></tr></thead>
-          <tbody id="leads"></tbody>
-        </table>
+    <!-- ряд 3: источники лидов -->
+    <div class="panel">
+      <div class="panel-head">
+        <h2>Источники лидов</h2>
+        <span class="hint">доля заявок</span>
       </div>
-
-      <div class="panel">
-        <div class="panel-head">
-          <h2>Источники лидов</h2>
-          <span class="hint">доля заявок</span>
-        </div>
-        <div class="chart-box sm"><div class="loader" id="src-loader">загружаю источники</div><canvas id="srcChart" role="img" aria-label="Круговая диаграмма источников лидов"></canvas></div>
-      </div>
+      <div class="chart-box sm"><div class="loader" id="src-loader">загружаю источники</div><canvas id="srcChart" role="img" aria-label="Круговая диаграмма источников лидов"></canvas></div>
     </div>
 
     <footer>VISUVA · дашборд продаж · данные демонстрационные, подключаются к CRM и рекламным кабинетам</footer>
@@ -491,19 +478,6 @@
       });
     }
     document.getElementById('side-counters').innerHTML=sc;
-
-    // Лиды
-    var stMap={new:['new','\u041d\u043e\u0432\u044b\u0439'],work:['work','\u0412 \u0440\u0430\u0431\u043e\u0442\u0435'],prod:['prod','\u0412 \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0441\u0442\u0432\u0435'],won:['won','\u0412\u044b\u0438\u0433\u0440\u0430\u043d\u0430']};
-    var lh='';
-    if(!d.leads.length){
-      lh='<tr><td colspan="3" style="text-align:center;color:var(--ink-4);padding:22px 10px">нет данных</td></tr>';
-    } else {
-      d.leads.forEach(function(r){
-        var st=stMap[r[2]];
-        lh+='<tr><td class="lname">'+r[0]+'</td><td class="lsrc">'+r[1]+'</td><td style="text-align:right"><span class="st '+st[0]+'">'+st[1]+'</span></td></tr>';
-      });
-    }
-    document.getElementById('leads').innerHTML=lh;
 
     drawSrc(d);
     renderRoi();
