@@ -303,7 +303,7 @@
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Авито</h2>
-        <span class="hint" id="avito-month-label">сводка</span>
+        <select id="avito-month" class="source-filter"></select>
       </div>
       <div class="kpis" id="avito-kpis"></div>
       <div class="chart-box" style="height:240px;margin-top:14px"><div class="loader" id="avito-loader">загружаю данные Авито</div><canvas id="avitoChart"></canvas></div>
@@ -313,7 +313,7 @@
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Авито · регионы</h2>
-        <span class="hint">за последний заполненный месяц</span>
+        <span class="hint" id="avito-regions-label"></span>
       </div>
       <table class="roi-table">
         <thead><tr>
@@ -607,6 +607,7 @@
 
   // ===== АВИТО: сводка + регионы =====
   var avitoChart=null;
+  var avitoSelectedIdx=null;  // null = последний заполненный
 
   // ищем последний месяц где есть осмысленные данные (показы или контакты)
   function avitoLastMonthIdx(total){
@@ -615,6 +616,14 @@
       if((sh!=null && sh>0) || (ct!=null && ct>0)) return i;
     }
     return -1;
+  }
+  // "полный" месяц — есть и бюджет и показы
+  function avitoLastFullIdx(total){
+    for(var i=total.months.length-1;i>=0;i--){
+      var sh=total.shows[i], bg=total.budget[i];
+      if(sh!=null && sh>0 && bg!=null && bg>0) return i;
+    }
+    return avitoLastMonthIdx(total);
   }
   function avitoFmtRub(v){
     if(v==null||v===0) return '—';
@@ -630,11 +639,37 @@
     }
     var av=reachData.avito;
     var total=av.total;
-    var idx=avitoLastMonthIdx(total);
+
+    // заполняем дропдаун месяцев (только заполненные — где есть показы ИЛИ контакты)
+    var sel=document.getElementById('avito-month');
+    if(sel && !sel.dataset.filled){
+      var defaultIdx = avitoLastFullIdx(total);
+      // собираем индексы месяцев с данными
+      var indices=[];
+      for(var k=0;k<total.months.length;k++){
+        var sh=total.shows[k], ct=total.contacts[k];
+        if((sh!=null && sh>0) || (ct!=null && ct>0)) indices.push(k);
+      }
+      // от нового к старому в выпадающем
+      indices.reverse();
+      sel.innerHTML = indices.map(function(i){
+        var s = total.months[i] + (i===defaultIdx?' · последний полный':'');
+        return '<option value="'+i+'"'+(i===defaultIdx?' selected':'')+'>'+s+'</option>';
+      }).join('');
+      sel.dataset.filled='1';
+      sel.addEventListener('change', function(){
+        avitoSelectedIdx = parseInt(this.value, 10);
+        renderAvito();
+      });
+      if(avitoSelectedIdx==null) avitoSelectedIdx = defaultIdx;
+    }
+
+    var idx = (avitoSelectedIdx!=null) ? avitoSelectedIdx : avitoLastFullIdx(total);
     if(idx<0){ hideLoader('avito-loader'); return; }
 
     var monthLabel=total.months[idx];
-    document.getElementById('avito-month-label').textContent='за '+monthLabel.toLowerCase();
+    var regLabel=document.getElementById('avito-regions-label');
+    if(regLabel) regLabel.textContent='за '+monthLabel.toLowerCase();
 
     // KPI карточки
     var kpis=[
