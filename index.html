@@ -534,6 +534,28 @@
     }
     var leadsData=months.map(function(m){return leadsMap[monthKey(m)]||0;});
 
+    // Линия — охват (или просмотры для YouTube/Telegram) из reachData
+    // Сопоставляем канал из smm с каналом из reach по имени
+    var reachLine = months.map(function(){return 0;});
+    var lineLabel = 'Прирост подписчиков';
+    if(reachData && reachData.channels){
+      var rch = reachData.channels.filter(function(x){
+        var a=String(x.name||'').toLowerCase(), b=String(ch.name||'').toLowerCase();
+        // совпадение по ключевому слову (inst/vk/youtube/telegram)
+        if(b.indexOf('inst')>=0 && a.indexOf('inst')>=0) return true;
+        if(b.indexOf('vk')>=0  && a.indexOf('vk')>=0)  return true;
+        if(b.indexOf('you')>=0 && a.indexOf('you')>=0) return true;
+        if(b.indexOf('tele')>=0 && a.indexOf('tele')>=0) return true;
+        return a===b;
+      })[0];
+      if(rch){
+        var rmap={};
+        (rch.reach||[]).forEach(function(p){ rmap[p.month]=p.value; });
+        reachLine = months.map(function(m){ var v=rmap[m]; return (v===null||v===undefined)?null:v; });
+        lineLabel = rch.metric || 'Охват';
+      }
+    }
+
     var col=chanColor(ch.name);
     var labels=months.map(function(m){return shortMonth(m);});
 
@@ -541,7 +563,7 @@
     chLeadsChart=new Chart(document.getElementById('chLeadsChart'),{
       data:{labels:labels, datasets:[
         {type:'bar',label:'Лиды с этого канала',data:leadsData,backgroundColor:col,borderRadius:5,maxBarThickness:40,yAxisID:'y1',order:2},
-        {type:'line',label:'Прирост подписчиков',data:growData,borderColor:'#3a4150',backgroundColor:'#3a4150',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1}
+        {type:'line',label:lineLabel,data:reachLine,borderColor:'#3a4150',backgroundColor:'#3a4150',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1,spanGaps:true}
       ]},
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
         plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
@@ -719,7 +741,9 @@
   // браузер JSON не отдаст — тогда останется демо-режим (это нормально).
   // ===== СОЦСЕТИ из управленческого Apps Script (JSONP) =====
   var SMM_URL='https://script.google.com/macros/s/AKfycbywNGeF17oqQVX6hiPfwJ46_oeSFVNL3Ou7kOc9SqJPnAC7-tkypK4CksJ6a1XLpdM/exec';
-  var smmChart=null, smmData=null, curChan=0;
+  // охваты/просмотры из таблицы маркетинга
+  var REACH_URL='https://script.google.com/macros/s/AKfycbzhUZRwqLEcU5w1WAKRCbCDobM0UNVojTZrUlhRL-zl9w0abL9BBQb1vimTe_fMWDqa/exec';
+  var smmChart=null, smmData=null, reachData=null, curChan=0;
 
   // цвет канала по названию
   function chanColor(name){
@@ -765,6 +789,19 @@
       var host=document.getElementById('social');
       if(host) host.innerHTML='<div style="color:var(--ink-4);font-size:13px">Не удалось загрузить данные соцсетей</div>';
     };
+    document.body.appendChild(s);
+  }
+
+  function loadReach(){
+    var cb='__reach_cb_'+Date.now();
+    window[cb]=function(data){
+      reachData=data;
+      if(typeof renderChLeads==='function') renderChLeads();
+      try{ delete window[cb]; }catch(e){}
+    };
+    var s=document.createElement('script');
+    s.src=REACH_URL+'?callback='+cb;
+    s.onerror=function(){ /* нет охватов — блок отрисуется без них */ };
     document.body.appendChild(s);
   }
 
@@ -832,6 +869,7 @@
   }
 
   loadSmm();
+  loadReach();
 
   // утилита — скрыть индикатор загрузки
   function hideLoader(id){ var el=document.getElementById(id); if(el) el.classList.add('hide'); }
