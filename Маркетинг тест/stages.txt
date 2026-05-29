@@ -1,0 +1,105 @@
+============================================================
+СТАДИИ СДЕЛОК (для DEAL_MAP):
+============================================================
+  ENTITY_ID=DEAL_STAGE       код=NEW                      "Договор подписан"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:NEW                   "Новый проект"
+  ENTITY_ID=DEAL_STAGE_4     код=C4:NEW                   "Новое обращение"
+  ENTITY_ID=DEAL_STAGE_5     код=C5:NEW                   "Новый проект"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:UC_8VK6P3             "Готовы к работе"
+  ENTITY_ID=DEAL_STAGE       код=PREPARATION              "Ожидание поступления аванса"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:NEW                   "Диагностика потребности"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:PREPARATION           "Производство"
+  ENTITY_ID=DEAL_STAGE_4     код=C4:PREPARATION           "Диагностика неисправности"
+  ENTITY_ID=DEAL_STAGE_5     код=C5:PREPARATION           "Формирование/Анализ ТЗ"
+  ENTITY_ID=DEAL_STAGE       код=PREPAYMENT_INVOICE       "Аванс поступил"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:UC_NQZQP9             "Отложенный спрос"
+  ENTITY_ID=DEAL_STAGE_4     код=C4:PREPAYMENT_INVOICE    "Устранение неисправности"
+  ENTITY_ID=DEAL_STAGE_5     код=C5:PREPAYMENT_INVOICE    "Проектирование"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:UC_VCZSHF             "Пост кузовной сборки"
+  ENTITY_ID=DEAL_STAGE       код=UC_N7OTHL                "Доплата 1 поступила"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:PREPARATION           "Демо / тех. валидация"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:UC_QPH458             "Пост 1"
+  ENTITY_ID=DEAL_STAGE_5     код=C5:EXECUTING             "В работе"
+  ENTITY_ID=DEAL_STAGE_4     код=C4:UC_P7AMEI             "Отправлен заказ-наряд на оплату"
+  ENTITY_ID=DEAL_STAGE       код=EXECUTING                "Доплата 2 поступила"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:FINAL_INVOICE         "КП отправлено"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:UC_G9N63N             "Пост 2"
+  ENTITY_ID=DEAL_STAGE_4     код=C4:EXECUTING             "Выдано клиенту (сформирован Акт выполненных работ)"
+  ENTITY_ID=DEAL_STAGE_5     код=C5:FINAL_INVOICE         "Согласование эскиза"
+  ENTITY_ID=DEAL_STAGE       код=UC_NM0F4A                "Техника выдана/Договор закрыт"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:UC_L5WUDZ             "Договор отправлен"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:UC_ZN3JYV             "Пост 3"
+  ENTITY_ID=DEAL_STAGE_5     код=C5:WON                   "Эскиз передан на согласование с заказчиком"
+  ENTITY_ID=DEAL_STAGE_4     код=C4:UC_R05F3K             "Анализ неисправности Конструкторским отделом"
+  ENTITY_ID=DEAL_STAGE       код=WON                      "Сделка успешна"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:WON                   "Договор подписан"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:UC_HAWXWN             "Пост 4"
+  ENTITY_ID=DEAL_STAGE_4     код=C4:WON                   "Неисправность отработана"
+  ENTITY_ID=DEAL_STAGE_5     код=C5:LOSE                  "Проект провален"
+  ENTITY_ID=DEAL_STAGE       код=LOSE                     "Сделка провалена"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:LOSE                  "Сделка провалена"
+  ENTITY_ID=DEAL_STAGE_4     код=C4:LOSE                  "-"
+  ENTITY_ID=DEAL_STAGE_5     код=C5:APOLOGY               "Анализ причины провала"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:UC_RAO4M3             "Тест/Драйв"
+  ENTITY_ID=DEAL_STAGE       код=APOLOGY                  "Анализ причины провала"
+  ENTITY_ID=DEAL_STAGE_1     код=C1:APOLOGY               "Анализ причины провала"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:UC_GUYRVS             "Выдача клиенту"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:WON                   "Проект успешно завершен"
+  ENTITY_ID=DEAL_STAGE_3     код=C3:LOSE                  "Проект аннулирован"
+
+============================================================
+СТАТУСЫ ЛИДОВ (для LEAD_MAP):
+============================================================
+  код=IN_PROCESS               "Связь установлена"
+  код=NEW                      "Квалификация"
+  код=UC_5Q4J0A                "Отложенные лиды"
+  код=CONVERTED                "Успех — Потенциальный клиент"
+  код=JUNK                     "Некачественный лид"
+
+============================================================
+ИСТОЧНИКИ (поле SOURCE_ID сделок):
+============================================================
+  код=WEBFORM                  "Instagram Visuva"
+  код=CALLBACK                 "Telegram Visuva"
+  код=RC_GENERATOR             "YouTube Visuva"
+  код=STORE                    "Сайт"
+  код=REPEAT_SALE              "Мероприятие"
+  код=1                        "По рекомендации"
+  код=2                        "Instagram Петра"
+  код=CALL                     "Не выбрано"
+  код=BOOKING                  "Онлайн-запись"
+  код=UC_V4CAP1                "Авито"
+
+------------------------------------------------------------
+Сколько СДЕЛОК по каждому источнику (факт):
+------------------------------------------------------------
+  Instagram Visuva               25  [код: WEBFORM]
+  Сайт                           24  [код: STORE]
+  (пусто)                        23  [код: (пусто)]
+  Instagram Петра                11  [код: 2]
+  Telegram Visuva                9  [код: CALLBACK]
+  Не выбрано                     5  [код: CALL]
+  Авито                          5  [код: UC_V4CAP1]
+  RECOMMENDATION                 2  [код: RECOMMENDATION]
+  YouTube Visuva                 2  [код: RC_GENERATOR]
+  По рекомендации                2  [код: 1]
+  PARTNER                        1  [код: PARTNER]
+
+------------------------------------------------------------
+Сколько ЛИДОВ по каждому источнику (факт):
+------------------------------------------------------------
+  Сайт                           95  [код: STORE]
+  Instagram Visuva               72  [код: WEBFORM]
+  Instagram Петра                57  [код: 2]
+  EMAIL                          13  [код: EMAIL]
+  Telegram Visuva                10  [код: CALLBACK]
+  Авито                          8  [код: UC_V4CAP1]
+  Не выбрано                     4  [код: CALL]
+  (пусто)                        3  [код: (пусто)]
+  YouTube Visuva                 3  [код: RC_GENERATOR]
+  По рекомендации                3  [код: 1]
+  Мероприятие                    2  [код: REPEAT_SALE]
+  TRADE_SHOW                     1  [код: TRADE_SHOW]
+  RECOMMENDATION                 1  [код: RECOMMENDATION]
+
+Скопируй нужные коды в DEAL_MAP и LEAD_MAP в скрипте.
