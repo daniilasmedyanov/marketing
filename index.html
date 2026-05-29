@@ -299,6 +299,35 @@
       </table>
     </div>
 
+    <!-- ряд 2.7: Авито сводка -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <h2>Авито</h2>
+        <span class="hint" id="avito-month-label">сводка</span>
+      </div>
+      <div class="kpis" id="avito-kpis"></div>
+      <div class="chart-box" style="height:240px;margin-top:14px"><div class="loader" id="avito-loader">загружаю данные Авито</div><canvas id="avitoChart"></canvas></div>
+    </div>
+
+    <!-- ряд 2.8: Авито по регионам -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <h2>Авито · регионы</h2>
+        <span class="hint">за последний заполненный месяц</span>
+      </div>
+      <table class="roi-table">
+        <thead><tr>
+          <th>Регион</th>
+          <th style="text-align:right">Показы</th>
+          <th style="text-align:right">Просмотры</th>
+          <th style="text-align:right">Контакты</th>
+          <th style="text-align:right">Цена контакта</th>
+          <th style="text-align:right">Конверсия</th>
+        </tr></thead>
+        <tbody id="avito-regions"></tbody>
+      </table>
+    </div>
+
     <!-- ряд 3: источники лидов -->
     <div class="panel">
       <div class="panel-head">
@@ -576,7 +605,107 @@
     });
   }
 
-  // ===== Динамика во времени: лиды и сделки по неделям =====
+  // ===== АВИТО: сводка + регионы =====
+  var avitoChart=null;
+
+  // ищем последний месяц где есть осмысленные данные (показы или контакты)
+  function avitoLastMonthIdx(total){
+    for(var i=total.months.length-1;i>=0;i--){
+      var sh=total.shows[i], ct=total.contacts[i];
+      if((sh!=null && sh>0) || (ct!=null && ct>0)) return i;
+    }
+    return -1;
+  }
+  function avitoFmtRub(v){
+    if(v==null||v===0) return '—';
+    if(v>=1000000) return (Math.round(v/100000)/10).toLocaleString('ru-RU')+' млн ₽';
+    if(v>=1000) return Math.round(v/1000)+'к ₽';
+    return Math.round(v)+' ₽';
+  }
+
+  function renderAvito(){
+    if(!reachData || !reachData.avito){
+      hideLoader('avito-loader');
+      return;
+    }
+    var av=reachData.avito;
+    var total=av.total;
+    var idx=avitoLastMonthIdx(total);
+    if(idx<0){ hideLoader('avito-loader'); return; }
+
+    var monthLabel=total.months[idx];
+    document.getElementById('avito-month-label').textContent='за '+monthLabel.toLowerCase();
+
+    // KPI карточки
+    var kpis=[
+      { val: total.budget[idx]!=null ? avitoFmtRub(total.budget[idx]) : '—', sub: 'бюджет·' + (total.ads[idx]||0) + ' объявл.' , ico:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>', icoBg:'#dcfce7', icoColor:'#16a34a', label:'Бюджет' },
+      { val: fmt.format(total.shows[idx]||0), sub:'показов', ico:'<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>', icoBg:'#e0e7ff', icoColor:'#6366f1', label:'Показы' },
+      { val: fmt.format(total.views[idx]||0), sub:'просмотров', ico:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>', icoBg:'#ddd6fe', icoColor:'#7c3aed', label:'Просмотры' },
+      { val: fmt.format(total.contacts[idx]||0), sub:'запросов · '+(total.chat[idx]||0)+' в чат', ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', icoBg:'#fef3c7', icoColor:'#d97706', label:'Контакты' },
+      { val: avitoFmtRub(total.price_contact[idx]), sub:'за один контакт', ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>', icoBg:'#fee2e2', icoColor:'#dc2626', label:'Цена контакта' },
+    ];
+    var html='';
+    kpis.forEach(function(k){
+      html+='<div class="kpi"><div class="k-head"><span class="k-lab">'+k.label+'</span>'+
+        '<span class="k-ico" style="background:'+k.icoBg+';color:'+k.icoColor+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+k.ico+'</svg></span></div>'+
+        '<div class="k-val">'+k.val+'</div><div class="k-sub">'+k.sub+'</div></div>';
+    });
+    document.getElementById('avito-kpis').innerHTML=html;
+
+    // график динамики: столбы показов + линия контактов
+    var labels=total.months.map(shortMonth);
+    if(avitoChart) avitoChart.destroy();
+    avitoChart=new Chart(document.getElementById('avitoChart'),{
+      data:{labels:labels, datasets:[
+        {type:'bar',label:'Показы',data:total.shows.map(function(v){return v||0;}),backgroundColor:'#6366f1aa',borderRadius:5,maxBarThickness:36,yAxisID:'y',order:2},
+        {type:'line',label:'Запросы контактов',data:total.contacts.map(function(v){return v||0;}),borderColor:'#d97706',backgroundColor:'#d97706',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y1',order:1}
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+        plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
+          tooltip:{callbacks:{label:function(c){return '  '+c.dataset.label+': '+fmt.format(c.raw);}}}},
+        scales:{
+          y:{position:'left',grid:{color:'#eef0f4'},border:{display:false},beginAtZero:true,ticks:{color:'#8a91a0',font:{size:11},callback:function(v){return fmt.format(v);}}},
+          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,ticks:{color:'#8a91a0',font:{size:11},precision:0}},
+          x:{grid:{display:false},border:{display:false},ticks:{color:'#8a91a0',font:{size:11}}}
+        }}
+    });
+    hideLoader('avito-loader');
+
+    // таблица регионов за тот же idx-й месяц
+    var regions=av.regions||[];
+    // считаем валидные регионы (показы>0 или контакты>0)
+    var rows=regions.map(function(r){
+      var sh=(r.shows||[])[idx], vw=(r.views||[])[idx], ct=(r.contacts||[])[idx], pr=(r.price_contact||[])[idx];
+      var conv = (sh && sh>0 && ct!=null) ? (ct/sh*100) : null;
+      return {name:r.name, shows:sh, views:vw, contacts:ct, price:pr, conv:conv};
+    }).filter(function(r){ return (r.shows && r.shows>0) || (r.contacts && r.contacts>0); });
+    // сортируем по показам
+    rows.sort(function(a,b){return (b.shows||0)-(a.shows||0);});
+
+    var tb='';
+    if(!rows.length){
+      tb='<tr><td colspan="6" style="text-align:center;color:var(--ink-4);padding:22px 10px">нет данных за этот месяц</td></tr>';
+    } else {
+      rows.forEach(function(r){
+        var dot = r.name.indexOf('S2')===0 ? '#2f6bff' : '#16a34a';
+        var convCell='—', convCls='';
+        if(r.conv!=null){
+          var v=r.conv;
+          convCls = v>=0.05 ? 'hot' : (v>=0.02 ? 'warm' : 'cold');
+          convCell = (v<0.01?v.toFixed(3):v.toFixed(2))+'%';
+        }
+        tb+='<tr>'+
+          '<td><span class="rname"><span class="rdot" style="background:'+dot+'"></span>'+r.name+'</span></td>'+
+          '<td class="rnum">'+(r.shows!=null?fmt.format(r.shows):'—')+'</td>'+
+          '<td class="rnum">'+(r.views!=null?fmt.format(r.views):'—')+'</td>'+
+          '<td class="rnum">'+(r.contacts!=null?fmt.format(r.contacts):'—')+'</td>'+
+          '<td class="rnum">'+avitoFmtRub(r.price)+'</td>'+
+          '<td class="rpct '+convCls+'">'+convCell+'</td>'+
+          '</tr>';
+      });
+    }
+    document.getElementById('avito-regions').innerHTML=tb;
+  }
   var trendChart=null;
   function renderTrend(){
     var ctx=document.getElementById('trendChart');
@@ -797,6 +926,7 @@
     window[cb]=function(data){
       reachData=data;
       if(typeof renderChLeads==='function') renderChLeads();
+      if(typeof renderAvito==='function') renderAvito();
       try{ delete window[cb]; }catch(e){}
     };
     var s=document.createElement('script');
