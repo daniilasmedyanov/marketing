@@ -78,6 +78,7 @@
   .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:18px 20px;box-shadow:var(--shadow)}
   .kpi .k-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
   .kpi .k-label{font-size:12.5px;font-weight:600;color:var(--ink-3)}
+  .kpi .k-lab{font-size:12.5px;font-weight:600;color:var(--ink-3);margin-bottom:10px}
   .kpi .k-ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:none}
   .kpi .k-ico svg{width:17px;height:17px}
   .kpi .k-val{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1}
@@ -232,7 +233,16 @@
     <!-- KPI -->
     <div class="kpis" id="kpis"></div>
 
-    <!-- ряд 1: сквозная воронка на всю ширину -->
+    <!-- 1. Динамика во времени — тренд бизнеса -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <h2>Динамика во времени</h2>
+        <span class="hint">новые лиды и сделки по неделям</span>
+      </div>
+      <div class="chart-box" style="height:260px"><div class="loader" id="trend-loader">загружаю динамику</div><canvas id="trendChart"></canvas></div>
+    </div>
+
+    <!-- 2. Воронка продаж (Битрикс) — основной поток денег -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Воронка продаж</h2>
@@ -250,7 +260,7 @@
       </div>
     </div>
 
-    <!-- ряд 1.5: воронка бота SaleBot (вход до Битрикса) -->
+    <!-- 3. Воронка бота — побочный канал перед Битриксом -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Воронка бота</h2>
@@ -262,35 +272,16 @@
       </div>
     </div>
 
-    <!-- ряд 2: соцсети (данные из управленческого Apps Script) -->
+    <!-- 4. Источники лидов — откуда идёт поток -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
-        <h2>Социальные сети</h2>
-        <div class="chan-switch" id="chan-switch"></div>
+        <h2>Источники лидов</h2>
+        <span class="hint">доля заявок</span>
       </div>
-      <div class="chart-box" style="height:300px"><div class="loader" id="smm-loader">загружаю данные соцсетей<span style="font-size:11px;color:var(--ink-4)">из Google-таблицы (может занять до 10 секунд)</span></div><canvas id="smmChart"></canvas></div>
-      <div class="social-grid" id="social" style="margin-top:16px"></div>
+      <div class="chart-box sm"><div class="loader" id="src-loader">загружаю источники</div><canvas id="srcChart" role="img" aria-label="Круговая диаграмма источников лидов"></canvas></div>
     </div>
 
-    <!-- ряд 2.5: окупаемость каналов -->
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Динамика во времени</h2>
-        <span class="hint">новые лиды и сделки по неделям</span>
-      </div>
-      <div class="chart-box" style="height:260px"><div class="loader" id="trend-loader">загружаю динамику</div><canvas id="trendChart"></canvas></div>
-    </div>
-
-    <!-- ряд 2.55: канал ↔ лиды -->
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Канал и лиды</h2>
-        <div class="chan-switch" id="ch-leads-switch"></div>
-      </div>
-      <div class="chart-box" style="height:280px"><div class="loader" id="chleads-loader">ждём соцсети и лиды</div><canvas id="chLeadsChart"></canvas></div>
-    </div>
-
-    <!-- ряд 2.6: окупаемость каналов -->
+    <!-- 5. Окупаемость каналов — какой канал реально окупается -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Окупаемость каналов</h2>
@@ -305,7 +296,26 @@
       </table>
     </div>
 
-    <!-- ряд 2.7: Авито сводка -->
+    <!-- 6. Канал и лиды — корреляция активности канала с лидами -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <h2>Канал и лиды</h2>
+        <div class="chan-switch" id="ch-leads-switch"></div>
+      </div>
+      <div class="chart-box" style="height:280px"><div class="loader" id="chleads-loader">ждём соцсети и лиды</div><canvas id="chLeadsChart"></canvas></div>
+    </div>
+
+    <!-- 7. Социальные сети — SMM-метрики -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <h2>Социальные сети</h2>
+        <div class="chan-switch" id="chan-switch"></div>
+      </div>
+      <div class="chart-box" style="height:300px"><div class="loader" id="smm-loader">загружаю данные соцсетей<span style="font-size:11px;color:var(--ink-4)">из Google-таблицы (может занять до 10 секунд)</span></div><canvas id="smmChart"></canvas></div>
+      <div class="social-grid" id="social" style="margin-top:16px"></div>
+    </div>
+
+    <!-- 8. Авито сводка -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Авито</h2>
@@ -315,8 +325,8 @@
       <div class="chart-box" style="height:240px;margin-top:14px"><div class="loader" id="avito-loader">загружаю данные Авито</div><canvas id="avitoChart"></canvas></div>
     </div>
 
-    <!-- ряд 2.8: Авито по регионам -->
-    <div class="panel" style="margin-bottom:16px">
+    <!-- 9. Авито · регионы -->
+    <div class="panel">
       <div class="panel-head">
         <h2>Авито · регионы</h2>
         <span class="hint" id="avito-regions-label"></span>
@@ -332,15 +342,6 @@
         </tr></thead>
         <tbody id="avito-regions"></tbody>
       </table>
-    </div>
-
-    <!-- ряд 3: источники лидов -->
-    <div class="panel">
-      <div class="panel-head">
-        <h2>Источники лидов</h2>
-        <span class="hint">доля заявок</span>
-      </div>
-      <div class="chart-box sm"><div class="loader" id="src-loader">загружаю источники</div><canvas id="srcChart" role="img" aria-label="Круговая диаграмма источников лидов"></canvas></div>
     </div>
 
     <footer>VISUVA · дашборд продаж · данные демонстрационные, подключаются к CRM и рекламным кабинетам</footer>
@@ -679,16 +680,15 @@
 
     // KPI карточки
     var kpis=[
-      { val: total.budget[idx]!=null ? avitoFmtRub(total.budget[idx]) : '—', sub: 'бюджет·' + (total.ads[idx]||0) + ' объявл.' , ico:'<rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 10h18"/>', icoBg:'#dcfce7', icoColor:'#16a34a', label:'Бюджет' },
-      { val: fmt.format(total.shows[idx]||0), sub:'показов', ico:'<circle cx="12" cy="12" r="3"/><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/>', icoBg:'#e0e7ff', icoColor:'#6366f1', label:'Показы' },
-      { val: fmt.format(total.views[idx]||0), sub:'просмотров', ico:'<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/>', icoBg:'#ddd6fe', icoColor:'#7c3aed', label:'Просмотры' },
-      { val: fmt.format(total.contacts[idx]||0), sub:'запросов · '+(total.chat[idx]||0)+' в чат', ico:'<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>', icoBg:'#fef3c7', icoColor:'#d97706', label:'Контакты' },
-      { val: avitoFmtRub(total.price_contact[idx]), sub:'за один контакт', ico:'<line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/>', icoBg:'#fee2e2', icoColor:'#dc2626', label:'Цена контакта' },
+      { val: total.budget[idx]!=null ? avitoFmtRub(total.budget[idx]) : '—', sub: 'бюджет · ' + (total.ads[idx]||0) + ' объявл.', label:'Бюджет' },
+      { val: fmt.format(total.shows[idx]||0), sub:'показов', label:'Показы' },
+      { val: fmt.format(total.views[idx]||0), sub:'просмотров', label:'Просмотры' },
+      { val: fmt.format(total.contacts[idx]||0), sub:'запросов · '+(total.chat[idx]||0)+' в чат', label:'Контакты' },
+      { val: avitoFmtRub(total.price_contact[idx]), sub:'за один контакт', label:'Цена контакта' },
     ];
     var html='';
     kpis.forEach(function(k){
-      html+='<div class="kpi"><div class="k-head"><span class="k-lab">'+k.label+'</span>'+
-        '<span class="k-ico" style="background:'+k.icoBg+';color:'+k.icoColor+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+k.ico+'</svg></span></div>'+
+      html+='<div class="kpi"><div class="k-lab">'+k.label+'</div>'+
         '<div class="k-val">'+k.val+'</div><div class="k-sub">'+k.sub+'</div></div>';
     });
     document.getElementById('avito-kpis').innerHTML=html;
