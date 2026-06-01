@@ -61,6 +61,20 @@
   .head p{font-size:15px;color:var(--ink-3);margin-top:6px}
 
   .periods{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:4px;box-shadow:var(--shadow)}
+  .pdf-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;box-shadow:var(--shadow);transition:.15s;font-family:inherit}
+  .pdf-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
+  .pdf-btn:hover svg{stroke:#fff}
+  /* стили для печати: убираем кнопки/переключатели/часы, разворачиваем графики, разрешаем фон */
+  @media print {
+    body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
+    .topbar, .periods, .pdf-btn, .loader, .demo-tag, .chan-switch, .source-filter, #avito-month, #funnel-mode, #roi-sort, #ch-leads-switch, #chan-switch { display: none !important; }
+    .panel { break-inside: avoid; page-break-inside: avoid; box-shadow: none; border: 1px solid #ddd; margin-bottom: 12px !important; }
+    .chart-box { height: auto !important; min-height: 200px; }
+    .funnel-layout { grid-template-columns: 1fr 220px !important; }
+    .head { margin-bottom: 16px; }
+    .wrap { padding: 0; max-width: none; }
+    @page { margin: 12mm; size: A4; }
+  }
   .periods button{
     font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-3);
     background:none;border:none;cursor:pointer;padding:7px 14px;border-radius:8px;transition:.16s;white-space:nowrap}
@@ -228,6 +242,10 @@
         <button data-p="year">Год</button>
         <button data-p="all" class="active">Всё</button>
       </div>
+      <button id="pdf-btn" class="pdf-btn" title="Сохранить страницу как PDF">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
+        PDF
+      </button>
     </div>
 
     <!-- KPI -->
@@ -888,6 +906,11 @@
     cur=b.dataset.p;
     this.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
     render(cur);
+  });
+
+  // Кнопка PDF — открывает диалог печати браузера (там можно выбрать "Сохранить как PDF")
+  document.getElementById('pdf-btn').addEventListener('click', function(){
+    window.print();
   });
 
   // переключатель Воронка / Слепок
