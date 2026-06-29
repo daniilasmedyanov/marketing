@@ -69,6 +69,7 @@
     body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
     .topbar, .periods, .pdf-btn, .loader, .demo-tag, .chan-switch, .source-filter, #avito-month, #funnel-mode, #roi-sort, #ch-leads-switch, #chan-switch { display: none !important; }
     .panel { break-inside: avoid; page-break-inside: avoid; box-shadow: none; border: 1px solid #ddd; margin-bottom: 12px !important; }
+    .section-divider { margin: 16px 0 10px !important; page-break-before: auto; page-break-after: avoid; }
     .chart-box { height: auto !important; min-height: 200px; }
     .funnel-layout { grid-template-columns: 1fr 220px !important; }
     .head { margin-bottom: 16px; }
@@ -197,6 +198,44 @@
 
   footer{margin-top:36px;font-size:12.5px;color:var(--ink-4);text-align:center}
   .demo-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--amber);background:var(--amber-soft);padding:3px 10px;border-radius:7px;margin-left:10px;vertical-align:middle}
+
+  /* Мероприятия */
+  .section-divider{display:flex;align-items:center;gap:14px;margin:32px 0 18px;padding:0 4px}
+  .section-divider-line{flex:1;height:1px;background:linear-gradient(to right, transparent, var(--line) 30%, var(--line) 70%, transparent)}
+  .section-divider-label{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:0 4px}
+  .events-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:6px}
+  .ecard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface)}
+  .ecard .elab{font-size:11.5px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
+  .ecard .eval{font-size:21px;font-weight:700;letter-spacing:-.02em}
+  .ecard .esub{font-size:11.5px;color:var(--ink-4);margin-top:3px}
+
+  .events-table{width:100%;border-collapse:collapse;font-size:13.5px}
+  .events-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-4);padding:0 10px 11px;border-bottom:1px solid var(--line)}
+  .events-table td{padding:12px 10px;border-bottom:1px solid var(--line-2)}
+  .events-table tr:last-child td{border-bottom:none}
+  .events-table tr.clickable{cursor:pointer;transition:.15s}
+  .events-table tr.clickable:hover{background:var(--bg)}
+  .events-table .ename{font-weight:600}
+  .events-table .esub-row{color:var(--ink-3);font-size:11.5px;margin-top:1px}
+  .events-table .enum{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .events-table .emoney{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .events-table .ecpl-good{color:var(--green)}
+  .events-table .ecpl-mid{color:var(--amber)}
+  .events-table .ecpl-bad{color:var(--red)}
+  .events-table .ecpl-na{color:var(--ink-4);font-weight:500}
+
+  .events-detail{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
+  .events-detail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+  .events-detail-head span{font-size:14px;font-weight:700}
+  .events-detail-close{border:none;background:transparent;font-size:22px;color:var(--ink-3);cursor:pointer;padding:0 6px;line-height:1}
+  .events-detail-close:hover{color:var(--ink)}
+  .events-detail-table{width:100%;border-collapse:collapse;font-size:13px}
+  .events-detail-table th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-4);padding:0 8px 9px;border-bottom:1px solid var(--line)}
+  .events-detail-table td{padding:9px 8px;border-bottom:1px solid var(--line-2)}
+  .events-detail-table tr:last-child td{border-bottom:none}
+  .events-detail-table .dnum{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
+  .events-detail-table .dpct{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:12px}
+  .events-detail-table .dcomment{color:var(--ink-3);font-size:12px}
 
   @media(max-width:540px){.head{align-items:flex-start}.topnav a:not(.active){display:none}}
 </style>
@@ -360,6 +399,54 @@
         </tr></thead>
         <tbody id="avito-regions"></tbody>
       </table>
+    </div>
+
+    <!-- РАЗДЕЛ: Эффективность мероприятий -->
+    <div class="section-divider">
+      <div class="section-divider-line"></div>
+      <div class="section-divider-label">Эффективность мероприятий</div>
+      <div class="section-divider-line"></div>
+    </div>
+
+    <!-- 10. Мероприятия -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <h2>Мероприятия</h2>
+        <span class="hint" id="events-summary"></span>
+      </div>
+      <div id="events-cards" class="events-cards"></div>
+      <table class="events-table" style="margin-top:18px">
+        <thead><tr>
+          <th>Мероприятие</th>
+          <th>Дата</th>
+          <th>Город</th>
+          <th style="text-align:right">Бюджет</th>
+          <th style="text-align:right">Контакты</th>
+          <th style="text-align:right">Квал</th>
+          <th style="text-align:right">В работе</th>
+          <th style="text-align:right">КП/Договор</th>
+          <th style="text-align:right">Сделки</th>
+          <th style="text-align:right">CPL</th>
+          <th style="text-align:right">CPA</th>
+        </tr></thead>
+        <tbody id="events-rows"></tbody>
+      </table>
+      <div id="events-detail" class="events-detail" style="display:none">
+        <div class="events-detail-head">
+          <span id="events-detail-title"></span>
+          <button class="events-detail-close" onclick="closeEventDetail()">×</button>
+        </div>
+        <table class="events-detail-table">
+          <thead><tr>
+            <th>Статья</th>
+            <th>Подкатегория</th>
+            <th style="text-align:right">Сумма</th>
+            <th style="text-align:right">%</th>
+            <th>Комментарий</th>
+          </tr></thead>
+          <tbody id="events-detail-rows"></tbody>
+        </table>
+      </div>
     </div>
 
     <footer>VISUVA · дашборд продаж · данные демонстрационные, подключаются к CRM и рекламным кабинетам</footer>
@@ -711,32 +798,33 @@
     });
     document.getElementById('avito-kpis').innerHTML=html;
 
-    // график эффективности: CTR (показ→просмотр) и Конверсия в контакт (просмотр→контакт)
+    // график: CTR (показ→просмотр, %) + запросы контактов (шт)
     var labels=total.months.map(shortMonth);
     var ctrData = total.months.map(function(_, i){
       var sh=total.shows[i], vw=total.views[i];
       if(!sh || sh<=0 || vw==null) return null;
       return +(vw/sh*100).toFixed(2);
     });
-    var convData = total.months.map(function(_, i){
-      var vw=total.views[i], ct=total.contacts[i];
-      if(!vw || vw<=0 || ct==null) return null;
-      return +(ct/vw*100).toFixed(2);
+    var contactsData = total.months.map(function(_, i){
+      var ct=total.contacts[i];
+      return (ct==null||ct===0) ? null : ct;
     });
 
     if(avitoChart) avitoChart.destroy();
     avitoChart=new Chart(document.getElementById('avitoChart'),{
-      type:'line',
       data:{labels:labels, datasets:[
-        {label:'CTR (показ → просмотр)',data:ctrData,borderColor:'#6366f1',backgroundColor:'#6366f1',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',spanGaps:true},
-        {label:'Конверсия в контакт (просмотр → контакт)',data:convData,borderColor:'#d97706',backgroundColor:'#d97706',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y1',spanGaps:true}
+        {type:'bar',label:'Запросы контактов',data:contactsData,backgroundColor:'#d97706cc',borderRadius:5,maxBarThickness:36,yAxisID:'y1',order:2},
+        {type:'line',label:'CTR (показ → просмотр), %',data:ctrData,borderColor:'#6366f1',backgroundColor:'#6366f1',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1,spanGaps:true}
       ]},
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
         plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
-          tooltip:{callbacks:{label:function(c){return '  '+c.dataset.label+': '+(c.raw==null?'—':c.raw+'%');}}}},
+          tooltip:{callbacks:{label:function(c){
+            if(c.dataset.yAxisID==='y') return '  '+c.dataset.label+': '+(c.raw==null?'—':c.raw+'%');
+            return '  '+c.dataset.label+': '+(c.raw==null?'—':fmt.format(c.raw));
+          }}}},
         scales:{
           y:{position:'left',grid:{color:'#eef0f4'},border:{display:false},beginAtZero:true,title:{display:true,text:'CTR, %',color:'#6366f1',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},callback:function(v){return v+'%';}}},
-          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,title:{display:true,text:'Конверсия, %',color:'#d97706',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},callback:function(v){return v+'%';}}},
+          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,title:{display:true,text:'Контактов',color:'#d97706',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},precision:0}},
           x:{grid:{display:false},border:{display:false},ticks:{color:'#8a91a0',font:{size:11}}}
         }}
     });
@@ -924,6 +1012,215 @@
   document.getElementById('pdf-btn').addEventListener('click', function(){
     window.print();
   });
+
+  // === МЕРОПРИЯТИЯ ===
+  // Данные приходят из Apps Script (по каждой таблице — свой URL).
+  // Сюда можно добавить несколько URL: каждая таблица = одно мероприятие.
+  var EVENTS_URLS = [
+    'https://script.google.com/macros/s/AKfycbxaZfTjfPfbQhyeS6P0GaGrDXGsO603VXpMoqpgVoRnDcq-u79vxp3gYQzDRJlkQ-5mRQ/exec',
+    // следующие мероприятия — добавляй ниже, по одному URL на каждую таблицу:
+    // 'https://script.google.com/macros/s/<URL_2>/exec',
+  ];
+  var EVENTS_DATA = [];   // заполняется из Apps Script
+
+  function moneyShort(v){
+    if(v >= 1000000) return (v/1000000).toFixed(v>=10000000?0:1).replace('.0','')+' млн ₽';
+    if(v >= 1000) return Math.round(v/1000)+' тыс ₽';
+    return fmt.format(v)+' ₽';
+  }
+  function cplClass(cpl){
+    if(cpl==null) return 'ecpl-na';
+    if(cpl < 100000) return 'ecpl-good';
+    if(cpl < 500000) return 'ecpl-mid';
+    return 'ecpl-bad';
+  }
+
+  function renderEvents(){
+    var ev = EVENTS_DATA;
+    if(!ev || ev.length === 0){
+      // данные ещё не пришли или пусто
+      var cards = document.getElementById('events-cards');
+      if(cards) cards.innerHTML = '<div style="color:var(--ink-4);font-size:13px;padding:8px">загружаю данные мероприятий…</div>';
+      document.getElementById('events-summary').textContent = '';
+      document.getElementById('events-rows').innerHTML = '';
+      return;
+    }
+    // верхние карточки-сводка
+    var total = ev.reduce(function(s,e){return s+e.budget;},0);
+    var totalContacts = ev.reduce(function(s,e){return s + ((e.metrics && e.metrics.contacts) || 0);},0);
+    var totalQual = ev.reduce(function(s,e){return s + ((e.metrics && e.metrics.qual) || 0);},0);
+    var avg = ev.length ? Math.round(total / ev.length) : 0;
+    var cards = document.getElementById('events-cards');
+    cards.innerHTML =
+      '<div class="ecard"><div class="elab">Мероприятий</div><div class="eval">'+ev.length+'</div><div class="esub">за 2026 год</div></div>' +
+      '<div class="ecard"><div class="elab">Общий бюджет</div><div class="eval">'+moneyShort(total)+'</div><div class="esub">сумма по факту</div></div>' +
+      '<div class="ecard"><div class="elab">Контактов</div><div class="eval">'+(totalContacts||'—')+'</div><div class="esub">человек встретили</div></div>' +
+      '<div class="ecard"><div class="elab">Квал-лидов</div><div class="eval">'+(totalQual||'—')+'</div><div class="esub">могут купить</div></div>';
+
+    document.getElementById('events-summary').textContent = 'нажми на строку — раскроется детализация трат';
+
+    // строки таблицы
+    var rows = document.getElementById('events-rows');
+    rows.innerHTML = '';
+    ev.forEach(function(e){
+      var m = e.metrics || {};
+      var contacts = m.contacts;
+      var qual = m.qual;
+      var inWork = m.inWork;
+      var inKp = m.inKp;
+      var deals = m.deals;
+      // CPL — по квал-лидам (квал = реально потенциальные)
+      var cpl = (qual && qual > 0) ? Math.round(e.budget / qual) : null;
+      // CPA — по сделкам если есть, иначе по тем что в КП/Договоре (прогноз)
+      var cpa = null;
+      var cpaIsProjected = false;
+      if (deals && deals > 0) {
+        cpa = Math.round(e.budget / deals);
+      } else if (inKp && inKp > 0) {
+        cpa = Math.round(e.budget / inKp);
+        cpaIsProjected = true;
+      }
+      var dateStr = e.dateStart === e.dateEnd ? e.dateStart : e.dateStart + ' — ' + e.dateEnd;
+
+      function num(v, fallback){
+        if(v == null || v === undefined) return fallback || '—';
+        return String(v);
+      }
+
+      var tr = document.createElement('tr');
+      tr.className = 'clickable';
+      tr.onclick = function(){ openEventDetail(e.id); };
+      tr.innerHTML =
+        '<td><div class="ename">'+e.name+'</div><div class="esub-row">'+e.notes+'</div></td>' +
+        '<td>'+dateStr+'</td>' +
+        '<td>'+e.city+'</td>' +
+        '<td class="emoney">'+moneyShort(e.budget)+'</td>' +
+        '<td class="enum">'+num(contacts)+'</td>' +
+        '<td class="enum">'+num(qual)+'</td>' +
+        '<td class="enum">'+num(inWork)+'</td>' +
+        '<td class="enum">'+num(inKp)+'</td>' +
+        '<td class="enum">'+num(deals, '0')+'</td>' +
+        '<td class="emoney '+cplClass(cpl)+'">'+(cpl==null?'—':moneyShort(cpl))+'</td>' +
+        '<td class="emoney '+cplClass(cpa)+'" title="'+(cpaIsProjected?'прогноз по лидам в КП/Договоре':'')+'">'+(cpa==null?'—':(cpaIsProjected?'~':'')+moneyShort(cpa))+'</td>';
+      rows.appendChild(tr);
+    });
+  }
+
+  function openEventDetail(id){
+    var e = EVENTS_DATA.find(function(x){return x.id===id;});
+    if(!e) return;
+    document.getElementById('events-detail').style.display = 'block';
+    document.getElementById('events-detail-title').textContent = 'Детализация трат — ' + e.name + ' (' + moneyShort(e.budget) + ')';
+    var rows = document.getElementById('events-detail-rows');
+    rows.innerHTML = '';
+    // показываем сводку по категориям из summary
+    var cats = e.categories || [];
+    if(cats.length){
+      cats.forEach(function(c){
+        var pct = c.pct != null ? c.pct : (c.amount / e.budget * 100).toFixed(1);
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>'+c.name+'</td>' +
+          '<td></td>' +
+          '<td class="dnum">'+fmt.format(c.amount)+' ₽</td>' +
+          '<td class="dpct">'+pct+'%</td>' +
+          '<td class="dcomment"></td>';
+        rows.appendChild(tr);
+      });
+    } else {
+      // если категорий нет — фоллбэк на детальные траты
+      e.details.forEach(function(d){
+        var pct = (d.amount / e.budget * 100).toFixed(1);
+        var tr = document.createElement('tr');
+        tr.innerHTML =
+          '<td>'+d.article+'</td>' +
+          '<td>'+d.sub+'</td>' +
+          '<td class="dnum">'+fmt.format(d.amount)+' ₽</td>' +
+          '<td class="dpct">'+pct+'%</td>' +
+          '<td class="dcomment">'+(d.comment||'')+'</td>';
+        rows.appendChild(tr);
+      });
+    }
+    // прокрутка к деталям
+    document.getElementById('events-detail').scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+  function closeEventDetail(){
+    document.getElementById('events-detail').style.display = 'none';
+  }
+
+  // Загрузка данных мероприятий из всех URLов EVENTS_URLS через JSONP.
+  // Apps Script отдаёт: {meta, summary:{categories,total}, details:[{category,items}]}
+  // Преобразуем в формат который ждёт renderEvents/openEventDetail.
+  function loadEvents(){
+    if(!EVENTS_URLS || !EVENTS_URLS.length){
+      renderEvents();
+      return;
+    }
+    var loaded = 0;
+    var collected = [];
+    EVENTS_URLS.forEach(function(url, idx){
+      var cb = '__events_cb_' + idx + '_' + Date.now();
+      window[cb] = function(data){
+        try{
+          if(data && data.meta){
+            // нормализация: преобразуем структуру Apps Script под формат renderEvents
+            var meta = data.meta;
+            var totalBudget = (data.summary && data.summary.total) || 0;
+            // details из Apps Script — массив [{category, items}], каждый item: {article, description, amount, ...}
+            // На дашборде ждём массив {article, sub, amount, comment} — каждая трата это строка
+            var details = [];
+            (data.details || []).forEach(function(cat){
+              (cat.items || []).forEach(function(it){
+                details.push({
+                  article: cat.category,
+                  sub: it.description || it.article || '',
+                  amount: it.amount || 0,
+                  comment: it.date || ''
+                });
+              });
+            });
+            collected.push({
+              id: meta.id || ('event_' + idx),
+              name: meta.name || 'Мероприятие',
+              sub: meta.sub || '',
+              dateStart: meta.dateStart || '',
+              dateEnd: meta.dateEnd || '',
+              city: meta.city || '',
+              type: meta.type || '',
+              notes: meta.notes || '',
+              budget: totalBudget,
+              metrics: data.metrics || {},
+              leadsImmediate: meta.leadsImmediate == null ? null : meta.leadsImmediate,
+              leads3m: meta.leads3m == null ? null : meta.leads3m,
+              deals6m: meta.deals6m == null ? null : meta.deals6m,
+              content: meta.content,
+              details: details,
+              // также сохраняем «сводку по категориям» — пригодится для будущих графиков
+              categories: (data.summary && data.summary.categories) || []
+            });
+          }
+        }catch(err){}
+        loaded++;
+        try{ delete window[cb]; }catch(e){}
+        if(loaded === EVENTS_URLS.length){
+          EVENTS_DATA = collected;
+          renderEvents();
+        }
+      };
+      var s = document.createElement('script');
+      s.src = url + (url.indexOf('?')>=0 ? '&' : '?') + 'callback=' + cb;
+      s.onerror = function(){
+        loaded++;
+        if(loaded === EVENTS_URLS.length){
+          EVENTS_DATA = collected;
+          renderEvents();
+        }
+      };
+      document.body.appendChild(s);
+    });
+  }
+
+  loadEvents();
 
   // переключатель Воронка / Слепок
   document.getElementById('funnel-mode').addEventListener('click',function(e){
