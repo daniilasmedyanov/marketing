@@ -64,7 +64,6 @@
   .pdf-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;box-shadow:var(--shadow);transition:.15s;font-family:inherit}
   .pdf-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
   .pdf-btn:hover svg{stroke:#fff}
-  /* стили для печати: убираем кнопки/переключатели/часы, разворачиваем графики, разрешаем фон */
   @media print {
     body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
     .topbar, .periods, .pdf-btn, .loader, .demo-tag, .chan-switch, .source-filter, #avito-month, #funnel-mode, #roi-sort, #ch-leads-switch, #chan-switch { display: none !important; }
@@ -82,11 +81,10 @@
   .periods button.active{background:var(--blue);color:#fff}
   .periods button:not(.active):hover{color:var(--ink)}
 
-  /* KPI */
   .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:clamp(20px,3vw,26px)}
   .kpis.kpis-5{grid-template-columns:repeat(5,1fr);gap:12px}
   .kpis.kpis-5 .kpi{padding:14px 14px}
-  .kpis.kpis-5 .kpi .k-val{font-size:22px}
+  .kpis.kpis-5 .kpi .k-val{font-size:22px;white-space:nowrap}
   .kpis.kpis-5 .kpi .k-lab{font-size:11.5px}
   .kpis.kpis-5 .kpi .k-sub{font-size:10.5px}
   @media(max-width:1100px){.kpis.kpis-5{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}}
@@ -119,7 +117,6 @@
   .funnel-skeleton .sk{height:46px;border-radius:10px;background:linear-gradient(90deg,#eef0f4 0%,#f5f6f8 50%,#eef0f4 100%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
   @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 
-  /* funnel */
   .funnel-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px}
   .source-filter{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 12px;cursor:pointer;outline:none;max-width:220px}
   .chan-switch{display:flex;gap:4px;flex-wrap:wrap}
@@ -157,7 +154,6 @@
   .fchild .fv{font-weight:700}
   .fexpand{font-size:11px;color:var(--ink-4);margin-left:6px;font-weight:600}
 
-  /* social */
   .social-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
   .scard{border:1px solid var(--line);border-radius:12px;padding:14px}
   .scard .sh{display:flex;align-items:center;gap:8px;margin-bottom:11px}
@@ -168,7 +164,6 @@
   .scard .smeta{font-size:11.5px;color:var(--ink-3);margin-top:3px}
   .scard .sgrow{font-size:11.5px;font-weight:600;margin-top:7px}
 
-  /* table */
   .lead-table{width:100%;border-collapse:collapse;font-size:13.5px}
   .lead-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-4);padding:0 10px 11px;border-bottom:1px solid var(--line)}
   .lead-table td{padding:12px 10px;border-bottom:1px solid var(--line-2)}
@@ -182,8 +177,8 @@
   .roi-table tr:last-child td{border-bottom:none}
   .roi-table .rname{font-weight:600;display:flex;align-items:center;gap:9px}
   .roi-table .rdot{width:8px;height:8px;border-radius:2px;flex:none}
-  .roi-table .rnum{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
-  .roi-table .rpct{text-align:right;font-weight:700;font-variant-numeric:tabular-nums}
+  .roi-table .rnum{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
+  .roi-table .rpct{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
   .roi-table .rbar{width:120px;padding-left:14px}
   .roi-table .rbar-track{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
   .roi-table .rbar-fill{height:100%;border-radius:3px;transition:width .25s}
@@ -199,7 +194,6 @@
   footer{margin-top:36px;font-size:12.5px;color:var(--ink-4);text-align:center}
   .demo-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--amber);background:var(--amber-soft);padding:3px 10px;border-radius:7px;margin-left:10px;vertical-align:middle}
 
-  /* Мероприятия */
   .section-divider{display:flex;align-items:center;gap:14px;margin:32px 0 18px;padding:0 4px}
   .section-divider-line{flex:1;height:1px;background:linear-gradient(to right, transparent, var(--line) 30%, var(--line) 70%, transparent)}
   .section-divider-label{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:0 4px}
@@ -287,10 +281,8 @@
       </button>
     </div>
 
-    <!-- KPI -->
     <div class="kpis" id="kpis"></div>
 
-    <!-- 1. Динамика во времени — тренд бизнеса -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Динамика во времени</h2>
@@ -299,7 +291,6 @@
       <div class="chart-box" style="height:260px"><div class="loader" id="trend-loader">загружаю динамику</div><canvas id="trendChart"></canvas></div>
     </div>
 
-    <!-- 2. Воронка продаж (Битрикс) — основной поток денег -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Воронка продаж</h2>
@@ -317,7 +308,6 @@
       </div>
     </div>
 
-    <!-- 3. Воронка бота — побочный канал перед Битриксом -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Воронка бота</h2>
@@ -329,7 +319,6 @@
       </div>
     </div>
 
-    <!-- 4. Источники лидов — откуда идёт поток -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Источники лидов</h2>
@@ -338,7 +327,6 @@
       <div class="chart-box sm"><div class="loader" id="src-loader">загружаю источники</div><canvas id="srcChart" role="img" aria-label="Круговая диаграмма источников лидов"></canvas></div>
     </div>
 
-    <!-- 5. Окупаемость каналов — какой канал реально окупается -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Окупаемость каналов</h2>
@@ -353,7 +341,6 @@
       </table>
     </div>
 
-    <!-- 6. Канал и лиды — корреляция активности канала с лидами -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Канал и лиды</h2>
@@ -362,7 +349,6 @@
       <div class="chart-box" style="height:280px"><div class="loader" id="chleads-loader">ждём соцсети и лиды</div><canvas id="chLeadsChart"></canvas></div>
     </div>
 
-    <!-- 7. Социальные сети — SMM-метрики -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Социальные сети</h2>
@@ -372,7 +358,6 @@
       <div class="social-grid" id="social" style="margin-top:16px"></div>
     </div>
 
-    <!-- 8. Авито сводка -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Авито</h2>
@@ -382,7 +367,6 @@
       <div class="chart-box" style="height:240px;margin-top:14px"><div class="loader" id="avito-loader">загружаю данные Авито</div><canvas id="avitoChart"></canvas></div>
     </div>
 
-    <!-- 9. Авито · регионы -->
     <div class="panel">
       <div class="panel-head">
         <h2>Авито · регионы</h2>
@@ -395,20 +379,18 @@
           <th style="text-align:right">Просмотры</th>
           <th style="text-align:right">Контакты</th>
           <th style="text-align:right">Цена контакта</th>
-          <th style="text-align:right">Конверсия</th>
+          <th style="text-align:right">CTR</th>
         </tr></thead>
         <tbody id="avito-regions"></tbody>
       </table>
     </div>
 
-    <!-- РАЗДЕЛ: Эффективность мероприятий -->
     <div class="section-divider">
       <div class="section-divider-line"></div>
       <div class="section-divider-label">Эффективность мероприятий</div>
       <div class="section-divider-line"></div>
     </div>
 
-    <!-- 10. Мероприятия -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
         <h2>Мероприятия</h2>
@@ -462,7 +444,6 @@
   function money(v){return fmt.format(Math.round(v))+' \u20bd';}
   function money_k(v){return v>=1e6?(v/1e6).toFixed(1).replace('.',',')+' \u043c\u043b\u043d':Math.round(v/1e3)+'\u202f\u0442\u044b\u0441';}
 
-  // ===== ДАННЫЕ по периодам (демо обнулено; воронка и KPI Сделки/Лиды подменяются live из Битрикса) =====
   var EMPTY={
       kpi:{revenue:0, deals:0, leads:0, conv:0, avg:0, reachTotal:0},
       funnel:[0,0,0,0,0],
@@ -475,7 +456,6 @@
   var FUNNEL_LABELS=['\u041b\u0438\u0434\u044b','\u041a\u0432\u0430\u043b\u0438\u0444\u0438\u0446\u0438\u0440\u043e\u0432\u0430\u043d\u044b','\u041a\u041f / \u043f\u0435\u0440\u0435\u0433\u043e\u0432\u043e\u0440\u044b','\u0421\u0434\u0435\u043b\u043a\u0430','\u0412 \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0441\u0442\u0432\u0435'];
   var FUNNEL_COLORS=['#2f6bff','#7c3aed','#d97706','#16a34a','#0891b2'];
 
-  // LIVE-данные из funnel.json (если файл рядом с дашбордом). null = демо-режим.
   var LIVE=null;
   var SOC={
     inst:{name:'Instagram',c:'#e1306c',ic:'<path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><rect x="2" y="2" width="20" height="20" rx="5"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/>'},
@@ -486,7 +466,6 @@
 
   var srcChart, cur='all', curSource='__all__', curMode='funnel', roiSort='total';
 
-  // Данные за текущий период из структуры periods (доступно всем функциям)
   function periodBlock(){
     if(!LIVE || !LIVE.periods) return null;
     return LIVE.periods[cur] || LIVE.periods['all'] || null;
@@ -504,7 +483,6 @@
     var k=d.kpi;
     var arrowUp='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>';
 
-    // Данные за текущий период из структуры periods
     var EMPTY_SRC={total:0,funnel:[],snapshot:[],side:[]};
     function dealsData(){
       var pb=periodBlock();
@@ -525,7 +503,6 @@
       return pb.leads;
     }
 
-    // KPI — если есть LIVE, подменяем число сделок и лидов реальными
     var dealsVal=k.deals, leadsVal=k.leads;
     if(LIVE){
       var dd0=dealsData();
@@ -533,7 +510,6 @@
       var ld0=leadsData();
       if(ld0 && ld0.funnel && ld0.funnel[0]) leadsVal=ld0.funnel[0].count;
     }
-    // KPI «Подписчики соцсетей» — сумма последних значений всех каналов
     var reachTotal=0, reachGrow=0;
     if(smmData && smmData.smm){
       smmData.smm.forEach(function(ch){
@@ -554,7 +530,6 @@
         'var(--purple)','var(--purple-soft)')+
       kpiCard('\u041f\u043e\u0434\u043f\u0438\u0441\u0447\u0438\u043a\u0438',reachTxt,reachSub,'','<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>','var(--blue)','var(--blue-soft)');
 
-    // СКВОЗНАЯ воронка: лиды -> сделки. Строим обе колонки (воронка + слепок).
     var LEAD_COLORS=['#0891b2','#0e9488','#16a34a'];
 
 
@@ -566,13 +541,12 @@
         var leadArr = (ld && ld[whichMetric]) ? ld[whichMetric] : [];
         var dealArr = (dd && dd[whichMetric]) ? dd[whichMetric] : [];
 
-        // каждая группа масштабируется от СВОЕГО максимума (первая ступень = 100%)
         function rowsHtml(arr, palette){
           var gmax = Math.max.apply(null, arr.map(function(x){return x.count;}).concat([1]));
           var h='';
           for(var i=0;i<arr.length;i++){
             var v=arr[i].count;
-            var pct = v>0 ? Math.max(Math.round(v/gmax*100), 4) : 0; // 0 -> нет полоски, иначе минимум 4%
+            var pct = v>0 ? Math.max(Math.round(v/gmax*100), 4) : 0;
             var showPct = whichMetric==='funnel' && i>0;
             var conv = arr[i].conv;
             var pctVal = (conv!=null) ? conv : (arr[i-1] && arr[i-1].count ? Math.round(v/arr[i-1].count*100) : 0);
@@ -604,7 +578,6 @@
 
     document.getElementById('funnel-single').innerHTML = buildChain(curMode);
 
-    // Боковые счётчики: лиды + сделки (сделки — из выбранного источника)
     var sc='';
     if(LIVE){
       var dd2=dealsData();
@@ -627,12 +600,10 @@
     if(typeof renderBot==='function') renderBot();
   }
 
-  // ===== Канал ↔ лиды: прирост подписчиков канала + лиды с этого источника =====
-  // Сопоставление имени канала из соцсетей с именем источника в Битриксе.
   function chanToSource(chanName){
     var n=(chanName||'').toLowerCase();
     if(n.indexOf('inst')>=0) return 'Instagram Visuva';
-    if(n.indexOf('vk')>=0) return 'VK Visuva';   // если такого источника в Битриксе нет — линия лидов будет пустая
+    if(n.indexOf('vk')>=0) return 'VK Visuva';
     if(n.indexOf('you')>=0) return 'YouTube Visuva';
     if(n.indexOf('tele')>=0||n.indexOf('tg')>=0) return 'Telegram Visuva';
     return chanName;
@@ -660,13 +631,11 @@
     var months=growArr.slice(0,cut).map(function(x){return x.month;});
     var growData=growArr.slice(0,cut).map(function(x){return x.value;});
 
-    // лиды этого канала помесячно из Битрикса
     var srcName=chanToSource(ch.name);
     var leadsMap={};
     if(LIVE && LIVE.leads_monthly_by_source && LIVE.leads_monthly_by_source[srcName]){
       LIVE.leads_monthly_by_source[srcName].forEach(function(p){ leadsMap[p.month]=p.count; });
     }
-    // ключи у соцсетей: "Май 2025", у Битрикса: "2025-05" — переводим в общий ключ
     var ruM={'январь':'01','февраль':'02','март':'03','апрель':'04','май':'05','июнь':'06','июль':'07','август':'08','сентябрь':'09','октябрь':'10','ноябрь':'11','декабрь':'12'};
     function monthKey(human){
       var p=String(human).trim().split(/\s+/);
@@ -675,14 +644,11 @@
     }
     var leadsData=months.map(function(m){return leadsMap[monthKey(m)]||0;});
 
-    // Линия — охват (или просмотры для YouTube/Telegram) из reachData
-    // Сопоставляем канал из smm с каналом из reach по имени
     var reachLine = months.map(function(){return 0;});
     var lineLabel = 'Прирост подписчиков';
     if(reachData && reachData.channels){
       var rch = reachData.channels.filter(function(x){
         var a=String(x.name||'').toLowerCase(), b=String(ch.name||'').toLowerCase();
-        // совпадение по ключевому слову (inst/vk/youtube/telegram)
         if(b.indexOf('inst')>=0 && a.indexOf('inst')>=0) return true;
         if(b.indexOf('vk')>=0  && a.indexOf('vk')>=0)  return true;
         if(b.indexOf('you')>=0 && a.indexOf('you')>=0) return true;
@@ -717,55 +683,73 @@
     });
   }
 
-  // ===== АВИТО: сводка + регионы =====
+  // ===== АВИТО: новый формат данных =====
+  // av.months: ["Май 2025", ...]
+  // av.metrics.{ads,budget,spend,shows,views,contacts,price_view,price_contact}
+  //   .total: [...]
+  //   .breakdown: {"S2 Москва":[...], "Т8 Грозный":[...], ...}  (есть не у всех)
+  //   .byCity: {"Москва":[...], ...}  (только для не-средних)
   var avitoChart=null;
-  var avitoSelectedIdx=null;  // null = последний заполненный
+  var avitoSelectedIdx=null;
 
-  // ищем последний месяц где есть осмысленные данные (показы или контакты)
-  function avitoLastMonthIdx(total){
-    for(var i=total.months.length-1;i>=0;i--){
-      var sh=total.shows[i], ct=total.contacts[i];
-      if((sh!=null && sh>0) || (ct!=null && ct>0)) return i;
-    }
+  function avitoTotal(av, key, idx){
+    var m=av.metrics && av.metrics[key];
+    if(!m || !m.total) return null;
+    var v=m.total[idx];
+    return (v==null) ? null : v;
+  }
+  function avitoBd(av, key, name, idx){
+    var m=av.metrics && av.metrics[key];
+    if(!m || !m.breakdown || !m.breakdown[name]) return null;
+    var v=m.breakdown[name][idx];
+    return (v==null) ? null : v;
+  }
+  function avitoMonthHasData(av, i){
+    var sh=avitoTotal(av,'shows',i), ct=avitoTotal(av,'contacts',i);
+    return (sh!=null && sh>0) || (ct!=null && ct>0);
+  }
+  function avitoLastMonthIdx(av){
+    for(var i=av.months.length-1;i>=0;i--) if(avitoMonthHasData(av,i)) return i;
     return -1;
   }
-  // "полный" месяц — есть и бюджет и показы
-  function avitoLastFullIdx(total){
-    for(var i=total.months.length-1;i>=0;i--){
-      var sh=total.shows[i], bg=total.budget[i];
-      if(sh!=null && sh>0 && bg!=null && bg>0) return i;
+  function avitoLastFullIdx(av){
+    for(var i=av.months.length-1;i>=0;i--){
+      var sh=avitoTotal(av,'shows',i);
+      var bg=avitoTotal(av,'budget',i);
+      var sp=avitoTotal(av,'spend',i);
+      if(sh!=null && sh>0 && ((bg!=null && bg>0) || (sp!=null && sp>0))) return i;
     }
-    return avitoLastMonthIdx(total);
+    return avitoLastMonthIdx(av);
   }
   function avitoFmtRub(v){
-    if(v==null||v===0) return '—';
-    if(v>=1000000) return (Math.round(v/100000)/10).toLocaleString('ru-RU')+' млн ₽';
-    if(v>=1000) return Math.round(v/1000)+'к ₽';
-    return Math.round(v)+' ₽';
+    if(v==null||v===0) return '\u2014';
+    if(v>=1000000) return (Math.round(v/100000)/10).toLocaleString('ru-RU')+' \u043c\u043b\u043d \u20bd';
+    if(v>=1000) return Math.round(v/1000)+'\u043a \u20bd';
+    return Math.round(v)+' \u20bd';
+  }
+  // "S2 Москва" -> модель S2 (цвет), "Т8 Грозный" -> модель T8
+  function avitoModel(name){
+    var n=String(name||'').toLowerCase();
+    if(/^s2\b|^ѕ2\b/i.test(name)) return 'S2';
+    if(/^t8\b|^т8\b/i.test(name)) return 'T8';
+    return '';
   }
 
   function renderAvito(){
-    if(!reachData || !reachData.avito){
-      hideLoader('avito-loader');
-      return;
-    }
+    if(!reachData || !reachData.avito){ hideLoader('avito-loader'); return; }
     var av=reachData.avito;
-    var total=av.total;
+    if(!av.months || !av.metrics){ hideLoader('avito-loader'); return; }
 
-    // заполняем дропдаун месяцев (только заполненные — где есть показы ИЛИ контакты)
     var sel=document.getElementById('avito-month');
     if(sel && !sel.dataset.filled){
-      var defaultIdx = avitoLastFullIdx(total);
-      // собираем индексы месяцев с данными
+      var defaultIdx = avitoLastFullIdx(av);
       var indices=[];
-      for(var k=0;k<total.months.length;k++){
-        var sh=total.shows[k], ct=total.contacts[k];
-        if((sh!=null && sh>0) || (ct!=null && ct>0)) indices.push(k);
+      for(var k=0;k<av.months.length;k++){
+        if(avitoMonthHasData(av,k)) indices.push(k);
       }
-      // от нового к старому в выпадающем
       indices.reverse();
       sel.innerHTML = indices.map(function(i){
-        var s = total.months[i] + (i===defaultIdx?' · последний полный':'');
+        var s = av.months[i] + (i===defaultIdx?' \u00b7 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u043f\u043e\u043b\u043d\u044b\u0439':'');
         return '<option value="'+i+'"'+(i===defaultIdx?' selected':'')+'>'+s+'</option>';
       }).join('');
       sel.dataset.filled='1';
@@ -776,20 +760,40 @@
       if(avitoSelectedIdx==null) avitoSelectedIdx = defaultIdx;
     }
 
-    var idx = (avitoSelectedIdx!=null) ? avitoSelectedIdx : avitoLastFullIdx(total);
+    var idx = (avitoSelectedIdx!=null) ? avitoSelectedIdx : avitoLastFullIdx(av);
     if(idx<0){ hideLoader('avito-loader'); return; }
 
-    var monthLabel=total.months[idx];
+    var monthLabel=av.months[idx];
     var regLabel=document.getElementById('avito-regions-label');
-    if(regLabel) regLabel.textContent='за '+monthLabel.toLowerCase();
+    if(regLabel) regLabel.textContent='\u0437\u0430 '+monthLabel.toLowerCase();
 
-    // KPI карточки
+    var budget   = avitoTotal(av,'budget',idx);
+    var spend    = avitoTotal(av,'spend', idx);
+    var ads      = avitoTotal(av,'ads',   idx);
+    var shows    = avitoTotal(av,'shows', idx);
+    var views    = avitoTotal(av,'views', idx);
+    var contacts = avitoTotal(av,'contacts', idx);
+    var pcontact = avitoTotal(av,'price_contact', idx);
+
+    // Бюджет — главное факт, если есть; иначе план
+    var budgetVal, budgetSub;
+    if(spend!=null && spend>0){
+      budgetVal = avitoFmtRub(spend);
+      budgetSub = (budget!=null && budget>0 ? '\u0438\u0437 '+avitoFmtRub(budget)+' \u043f\u043b\u0430\u043d\u0430' : '\u0444\u0430\u043a\u0442') + ' \u00b7 ' + (ads||0) + ' \u043e\u0431\u044a\u044f\u0432\u043b.';
+    } else {
+      budgetVal = avitoFmtRub(budget);
+      budgetSub = '\u043f\u043b\u0430\u043d \u00b7 '+(ads||0)+' \u043e\u0431\u044a\u044f\u0432\u043b.';
+    }
+
+    var ctrTotal = (shows && shows>0 && views!=null) ? +(views/shows*100).toFixed(2) : null;
+    var viewsSub = (ctrTotal!=null) ? ('CTR '+ctrTotal+'%') : '\u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u043e\u0432';
+
     var kpis=[
-      { val: total.budget[idx]!=null ? avitoFmtRub(total.budget[idx]) : '—', sub: 'бюджет · ' + (total.ads[idx]||0) + ' объявл.', label:'Бюджет' },
-      { val: fmt.format(total.shows[idx]||0), sub:'показов', label:'Показы' },
-      { val: fmt.format(total.views[idx]||0), sub:'просмотров', label:'Просмотры' },
-      { val: fmt.format(total.contacts[idx]||0), sub:'запросов · '+(total.chat[idx]||0)+' в чат', label:'Контакты' },
-      { val: avitoFmtRub(total.price_contact[idx]), sub:'за один контакт', label:'Цена контакта' },
+      { val: budgetVal, sub: budgetSub, label:'\u0411\u044e\u0434\u0436\u0435\u0442' },
+      { val: fmt.format(shows||0), sub:'\u043f\u043e\u043a\u0430\u0437\u043e\u0432', label:'\u041f\u043e\u043a\u0430\u0437\u044b' },
+      { val: fmt.format(views||0), sub:viewsSub, label:'\u041f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u044b' },
+      { val: fmt.format(contacts||0), sub:'\u0437\u0430\u043f\u0440\u043e\u0441\u043e\u0432', label:'\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u044b' },
+      { val: avitoFmtRub(pcontact), sub:'\u0437\u0430 \u043e\u0434\u0438\u043d \u043a\u043e\u043d\u0442\u0430\u043a\u0442', label:'\u0426\u0435\u043d\u0430 \u043a\u043e\u043d\u0442\u0430\u043a\u0442\u0430' },
     ];
     var html='';
     kpis.forEach(function(k){
@@ -798,73 +802,78 @@
     });
     document.getElementById('avito-kpis').innerHTML=html;
 
-    // график: CTR (показ→просмотр, %) + запросы контактов (шт)
-    var labels=total.months.map(shortMonth);
-    var ctrData = total.months.map(function(_, i){
-      var sh=total.shows[i], vw=total.views[i];
+    var labels=av.months.map(shortMonth);
+    var showsArr = (av.metrics.shows && av.metrics.shows.total) || [];
+    var viewsArr = (av.metrics.views && av.metrics.views.total) || [];
+    var contactsArr = (av.metrics.contacts && av.metrics.contacts.total) || [];
+
+    var ctrData = av.months.map(function(_, i){
+      var sh=showsArr[i], vw=viewsArr[i];
       if(!sh || sh<=0 || vw==null) return null;
       return +(vw/sh*100).toFixed(2);
     });
-    var contactsData = total.months.map(function(_, i){
-      var ct=total.contacts[i];
+    var contactsData = av.months.map(function(_, i){
+      var ct=contactsArr[i];
       return (ct==null||ct===0) ? null : ct;
     });
 
     if(avitoChart) avitoChart.destroy();
     avitoChart=new Chart(document.getElementById('avitoChart'),{
       data:{labels:labels, datasets:[
-        {type:'bar',label:'Запросы контактов',data:contactsData,backgroundColor:'#d97706cc',borderRadius:5,maxBarThickness:36,yAxisID:'y1',order:2},
-        {type:'line',label:'CTR (показ → просмотр), %',data:ctrData,borderColor:'#6366f1',backgroundColor:'#6366f1',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1,spanGaps:true}
+        {type:'bar',label:'\u0417\u0430\u043f\u0440\u043e\u0441\u044b \u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043e\u0432',data:contactsData,backgroundColor:'#d97706cc',borderRadius:5,maxBarThickness:36,yAxisID:'y1',order:2},
+        {type:'line',label:'CTR (\u043f\u043e\u043a\u0430\u0437 \u2192 \u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440), %',data:ctrData,borderColor:'#6366f1',backgroundColor:'#6366f1',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1,spanGaps:true}
       ]},
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
         plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
           tooltip:{callbacks:{label:function(c){
-            if(c.dataset.yAxisID==='y') return '  '+c.dataset.label+': '+(c.raw==null?'—':c.raw+'%');
-            return '  '+c.dataset.label+': '+(c.raw==null?'—':fmt.format(c.raw));
+            if(c.dataset.yAxisID==='y') return '  '+c.dataset.label+': '+(c.raw==null?'\u2014':c.raw+'%');
+            return '  '+c.dataset.label+': '+(c.raw==null?'\u2014':fmt.format(c.raw));
           }}}},
         scales:{
           y:{position:'left',grid:{color:'#eef0f4'},border:{display:false},beginAtZero:true,title:{display:true,text:'CTR, %',color:'#6366f1',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},callback:function(v){return v+'%';}}},
-          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,title:{display:true,text:'Контактов',color:'#d97706',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},precision:0}},
+          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,title:{display:true,text:'\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u043e\u0432',color:'#d97706',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},precision:0}},
           x:{grid:{display:false},border:{display:false},ticks:{color:'#8a91a0',font:{size:11}}}
         }}
     });
     hideLoader('avito-loader');
 
-    // таблица регионов за тот же idx-й месяц
-    var regions=av.regions||[];
-    // считаем валидные регионы (показы>0 или контакты>0)
-    var rows=regions.map(function(r){
-      var sh=(r.shows||[])[idx], vw=(r.views||[])[idx], ct=(r.contacts||[])[idx], pr=(r.price_contact||[])[idx];
-      var conv = (sh && sh>0 && ct!=null) ? (ct/sh*100) : null;
-      return {name:r.name, shows:sh, views:vw, contacts:ct, price:pr, conv:conv};
+    // Таблица регионов: список ключей берём из shows.breakdown (самый полный)
+    var showsBd = (av.metrics.shows && av.metrics.shows.breakdown) || {};
+    var rows = Object.keys(showsBd).map(function(name){
+      var sh = avitoBd(av,'shows',name,idx);
+      var vw = avitoBd(av,'views',name,idx);
+      var ct = avitoBd(av,'contacts',name,idx);
+      var pr = avitoBd(av,'price_contact',name,idx);
+      var ctr = (sh && sh>0 && vw!=null) ? +(vw/sh*100).toFixed(2) : null;
+      return {name:name, shows:sh, views:vw, contacts:ct, price:pr, ctr:ctr};
     }).filter(function(r){ return (r.shows && r.shows>0) || (r.contacts && r.contacts>0); });
-    // сортируем по показам
     rows.sort(function(a,b){return (b.shows||0)-(a.shows||0);});
 
     var tb='';
     if(!rows.length){
-      tb='<tr><td colspan="6" style="text-align:center;color:var(--ink-4);padding:22px 10px">нет данных за этот месяц</td></tr>';
+      tb='<tr><td colspan="6" style="text-align:center;color:var(--ink-4);padding:22px 10px">\u043d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043c\u0435\u0441\u044f\u0446</td></tr>';
     } else {
       rows.forEach(function(r){
-        var dot = r.name.indexOf('S2')===0 ? '#2f6bff' : '#16a34a';
-        var convCell='—', convCls='';
-        if(r.conv!=null){
-          var v=r.conv;
-          convCls = v>=0.05 ? 'hot' : (v>=0.02 ? 'warm' : 'cold');
-          convCell = (v<0.01?v.toFixed(3):v.toFixed(2))+'%';
+        var model=avitoModel(r.name);
+        var dot = model==='S2' ? '#2f6bff' : (model==='T8' ? '#16a34a' : '#8a91a0');
+        var ctrCell='\u2014', ctrCls='';
+        if(r.ctr!=null){
+          ctrCls = r.ctr>=15 ? 'hot' : (r.ctr>=8 ? 'warm' : 'cold');
+          ctrCell = r.ctr+'%';
         }
         tb+='<tr>'+
           '<td><span class="rname"><span class="rdot" style="background:'+dot+'"></span>'+r.name+'</span></td>'+
-          '<td class="rnum">'+(r.shows!=null?fmt.format(r.shows):'—')+'</td>'+
-          '<td class="rnum">'+(r.views!=null?fmt.format(r.views):'—')+'</td>'+
-          '<td class="rnum">'+(r.contacts!=null?fmt.format(r.contacts):'—')+'</td>'+
+          '<td class="rnum">'+(r.shows!=null?fmt.format(r.shows):'\u2014')+'</td>'+
+          '<td class="rnum">'+(r.views!=null?fmt.format(r.views):'\u2014')+'</td>'+
+          '<td class="rnum">'+(r.contacts!=null?fmt.format(r.contacts):'\u2014')+'</td>'+
           '<td class="rnum">'+avitoFmtRub(r.price)+'</td>'+
-          '<td class="rpct '+convCls+'">'+convCell+'</td>'+
+          '<td class="rpct '+ctrCls+'">'+ctrCell+'</td>'+
           '</tr>';
       });
     }
     document.getElementById('avito-regions').innerHTML=tb;
   }
+
   var trendChart=null;
   function renderTrend(){
     var ctx=document.getElementById('trendChart');
@@ -873,7 +882,6 @@
     var leadsTS = (pb && pb.leads && pb.leads.timeseries) ? pb.leads.timeseries : [];
     var dealsTS = (pb && pb.deals && pb.deals.timeseries) ? pb.deals.timeseries : [];
 
-    // объединяем недели в общий список меток
     var weeks={};
     leadsTS.forEach(function(p){ weeks[p.week]=true; });
     dealsTS.forEach(function(p){ weeks[p.week]=true; });
@@ -886,7 +894,6 @@
     var leadsData=bucket(leadsTS);
     var dealsData=bucket(dealsTS);
 
-    // подписи: "12 май" (для понимания)
     var months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
     var pretty=labels.map(function(s){
       var d=new Date(s); return d.getDate()+' '+months[d.getMonth()];
@@ -914,7 +921,6 @@
     });
   }
 
-  // Окупаемость каналов: заявок -> сделка по каждому источнику лидов
   function renderRoi(){
     var host=document.getElementById('roi-tbody');
     if(!host) return;
@@ -924,9 +930,7 @@
       host.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:22px 10px">нет данных</td></tr>';
       return;
     }
-    // сортировка: по конверсии или по количеству заявок
     if(roiSort==='conv'){
-      // по конверсии, но "мало данных" (<3 заявок) в конец
       items.sort(function(a,b){
         var sa=a.total<3?-1:a.conv_pct, sb=b.total<3?-1:b.conv_pct;
         return sb-sa;
@@ -964,7 +968,6 @@
     var ctx=document.getElementById('srcChart');
     if(srcChart) srcChart.destroy();
 
-    // источники лидов из текущего периода (by_source)
     var items=[];
     var pb=periodBlock();
     if(pb && pb.leads && pb.leads.by_source){
@@ -975,7 +978,6 @@
     var total=items.reduce(function(a,s){return a+s[1];},0);
     var empty=!items.length;
 
-    // цвета: по каналу, иначе из палитры
     var pal=['#2f6bff','#1d8fd1','#7c3aed','#0077ff','#16a34a','#d97706','#e1306c','#0891b2','#8a91a0'];
     var cols=items.map(function(s,i){
       var n=(s[0]||'').toLowerCase();
@@ -1008,20 +1010,14 @@
     render(cur);
   });
 
-  // Кнопка PDF — открывает диалог печати браузера (там можно выбрать "Сохранить как PDF")
   document.getElementById('pdf-btn').addEventListener('click', function(){
     window.print();
   });
 
-  // === МЕРОПРИЯТИЯ ===
-  // Данные приходят из Apps Script (по каждой таблице — свой URL).
-  // Сюда можно добавить несколько URL: каждая таблица = одно мероприятие.
   var EVENTS_URLS = [
     'https://script.google.com/macros/s/AKfycbxaZfTjfPfbQhyeS6P0GaGrDXGsO603VXpMoqpgVoRnDcq-u79vxp3gYQzDRJlkQ-5mRQ/exec',
-    // следующие мероприятия — добавляй ниже, по одному URL на каждую таблицу:
-    // 'https://script.google.com/macros/s/<URL_2>/exec',
   ];
-  var EVENTS_DATA = [];   // заполняется из Apps Script
+  var EVENTS_DATA = [];
 
   function moneyShort(v){
     if(v >= 1000000) return (v/1000000).toFixed(v>=10000000?0:1).replace('.0','')+' млн ₽';
@@ -1038,14 +1034,12 @@
   function renderEvents(){
     var ev = EVENTS_DATA;
     if(!ev || ev.length === 0){
-      // данные ещё не пришли или пусто
       var cards = document.getElementById('events-cards');
       if(cards) cards.innerHTML = '<div style="color:var(--ink-4);font-size:13px;padding:8px">загружаю данные мероприятий…</div>';
       document.getElementById('events-summary').textContent = '';
       document.getElementById('events-rows').innerHTML = '';
       return;
     }
-    // верхние карточки-сводка
     var total = ev.reduce(function(s,e){return s+e.budget;},0);
     var totalContacts = ev.reduce(function(s,e){return s + ((e.metrics && e.metrics.contacts) || 0);},0);
     var totalQual = ev.reduce(function(s,e){return s + ((e.metrics && e.metrics.qual) || 0);},0);
@@ -1059,7 +1053,6 @@
 
     document.getElementById('events-summary').textContent = 'нажми на строку — раскроется детализация трат';
 
-    // строки таблицы
     var rows = document.getElementById('events-rows');
     rows.innerHTML = '';
     ev.forEach(function(e){
@@ -1069,9 +1062,7 @@
       var inWork = m.inWork;
       var inKp = m.inKp;
       var deals = m.deals;
-      // CPL — по квал-лидам (квал = реально потенциальные)
       var cpl = (qual && qual > 0) ? Math.round(e.budget / qual) : null;
-      // CPA — по сделкам если есть, иначе по тем что в КП/Договоре (прогноз)
       var cpa = null;
       var cpaIsProjected = false;
       if (deals && deals > 0) {
@@ -1113,7 +1104,6 @@
     document.getElementById('events-detail-title').textContent = 'Детализация трат — ' + e.name + ' (' + moneyShort(e.budget) + ')';
     var rows = document.getElementById('events-detail-rows');
     rows.innerHTML = '';
-    // показываем сводку по категориям из summary
     var cats = e.categories || [];
     if(cats.length){
       cats.forEach(function(c){
@@ -1128,7 +1118,6 @@
         rows.appendChild(tr);
       });
     } else {
-      // если категорий нет — фоллбэк на детальные траты
       e.details.forEach(function(d){
         var pct = (d.amount / e.budget * 100).toFixed(1);
         var tr = document.createElement('tr');
@@ -1141,16 +1130,12 @@
         rows.appendChild(tr);
       });
     }
-    // прокрутка к деталям
     document.getElementById('events-detail').scrollIntoView({behavior:'smooth', block:'nearest'});
   }
   function closeEventDetail(){
     document.getElementById('events-detail').style.display = 'none';
   }
 
-  // Загрузка данных мероприятий из всех URLов EVENTS_URLS через JSONP.
-  // Apps Script отдаёт: {meta, summary:{categories,total}, details:[{category,items}]}
-  // Преобразуем в формат который ждёт renderEvents/openEventDetail.
   function loadEvents(){
     if(!EVENTS_URLS || !EVENTS_URLS.length){
       renderEvents();
@@ -1163,11 +1148,8 @@
       window[cb] = function(data){
         try{
           if(data && data.meta){
-            // нормализация: преобразуем структуру Apps Script под формат renderEvents
             var meta = data.meta;
             var totalBudget = (data.summary && data.summary.total) || 0;
-            // details из Apps Script — массив [{category, items}], каждый item: {article, description, amount, ...}
-            // На дашборде ждём массив {article, sub, amount, comment} — каждая трата это строка
             var details = [];
             (data.details || []).forEach(function(cat){
               (cat.items || []).forEach(function(it){
@@ -1195,7 +1177,6 @@
               deals6m: meta.deals6m == null ? null : meta.deals6m,
               content: meta.content,
               details: details,
-              // также сохраняем «сводку по категориям» — пригодится для будущих графиков
               categories: (data.summary && data.summary.categories) || []
             });
           }
@@ -1222,7 +1203,6 @@
 
   loadEvents();
 
-  // переключатель Воронка / Слепок
   document.getElementById('funnel-mode').addEventListener('click',function(e){
     var b=e.target.closest('button'); if(!b) return;
     curMode=b.dataset.m;
@@ -1230,7 +1210,6 @@
     render(cur);
   });
 
-  // переключатель сортировки в окупаемости каналов
   document.getElementById('roi-sort').addEventListener('click',function(e){
     var b=e.target.closest('button'); if(!b) return;
     roiSort=b.dataset.s;
@@ -1238,16 +1217,10 @@
     renderRoi();
   });
 
-  // Пытаемся подтянуть реальные данные из funnel.json (лежит рядом с дашбордом).
-  // Работает при открытии через локальный сервер или с github. При двойном клике
-  // браузер JSON не отдаст — тогда останется демо-режим (это нормально).
-  // ===== СОЦСЕТИ из управленческого Apps Script (JSONP) =====
   var SMM_URL='https://script.google.com/macros/s/AKfycbywNGeF17oqQVX6hiPfwJ46_oeSFVNL3Ou7kOc9SqJPnAC7-tkypK4CksJ6a1XLpdM/exec';
-  // охваты/просмотры из таблицы маркетинга
   var REACH_URL='https://script.google.com/macros/s/AKfycbzhUZRwqLEcU5w1WAKRCbCDobM0UNVojTZrUlhRL-zl9w0abL9BBQb1vimTe_fMWDqa/exec';
   var smmChart=null, smmData=null, reachData=null, curChan=0;
 
-  // цвет канала по названию
   function chanColor(name){
     var n=(name||'').toLowerCase();
     if(n.indexOf('inst')>=0) return '#f5a623';
@@ -1257,7 +1230,6 @@
     return '#2f6bff';
   }
 
-  // последнее НЕнулевое значение в массиве {month,value} (текущий месяц ещё пуст)
   function lastFilled(arr){
     if(!arr || !arr.length) return {value:0, idx:-1};
     for(var i=arr.length-1;i>=0;i--){
@@ -1266,7 +1238,6 @@
     return {value:0, idx:-1};
   }
 
-  // "Май 2025" / "Январь 2026" -> "Май '25" / "Янв '26"
   function shortMonth(m){
     if(!m) return m;
     var parts=String(m).trim().split(/\s+/);
@@ -1304,7 +1275,7 @@
     };
     var s=document.createElement('script');
     s.src=REACH_URL+'?callback='+cb;
-    s.onerror=function(){ /* нет охватов — блок отрисуется без них */ };
+    s.onerror=function(){};
     document.body.appendChild(s);
   }
 
@@ -1312,7 +1283,6 @@
     if(!smmData || !smmData.smm || !smmData.smm.length) return;
     var channels=smmData.smm;
 
-    // переключатель каналов
     var sw=document.getElementById('chan-switch');
     sw.innerHTML='';
     channels.forEach(function(ch,i){
@@ -1323,14 +1293,12 @@
       sw.appendChild(b);
     });
 
-    // карточки: последнее ЗАПОЛНЕННОЕ значение подписчиков (текущий месяц ещё пуст)
     var sc='';
     channels.forEach(function(ch){
       var subs=ch.subscribers||[];
       var grow=ch.growth||[];
       var lf=lastFilled(subs);
       var last=lf.value;
-      // прирост за тот же месяц, что и последнее заполненное значение подписчиков
       var lastGrow = (lf.idx>=0 && grow[lf.idx]) ? Number(grow[lf.idx].value) : 0;
       var col=chanColor(ch.name);
       var growTxt=lastGrow>0?('+'+fmt.format(lastGrow)):(lastGrow<0?fmt.format(lastGrow):'—');
@@ -1344,12 +1312,11 @@
     document.getElementById('social').innerHTML=sc;
     if(typeof refreshKpiAfterSmm==='function') refreshKpiAfterSmm();
 
-    // график выбранного канала: обрезаем пустой текущий месяц (данные с задержкой)
     var ch=channels[curChan];
     var subsArr=ch.subscribers||[];
     var growArr=ch.growth||[];
     var lf=lastFilled(subsArr);
-    var cut=lf.idx>=0?lf.idx+1:subsArr.length;  // до последнего заполненного включительно
+    var cut=lf.idx>=0?lf.idx+1:subsArr.length;
     var labels=subsArr.slice(0,cut).map(function(x){return shortMonth(x.month);});
     var subsData=subsArr.slice(0,cut).map(function(x){return x.value;});
     var growData=growArr.slice(0,cut).map(function(x){return x.value;});
@@ -1374,13 +1341,10 @@
   loadSmm();
   loadReach();
 
-  // утилита — скрыть индикатор загрузки
   function hideLoader(id){ var el=document.getElementById(id); if(el) el.classList.add('hide'); }
 
-  // после загрузки соцсетей: обновляем KPI и блок «канал и лиды»
   function refreshKpiAfterSmm(){
     if(typeof render==='function') render(cur);
-    // skip первый раз если LIVE ещё не пришёл — renderSmm сам скроет smm-лоадер; chleads подождёт LIVE
     hideLoader('smm-loader');
     if(LIVE) hideLoader('chleads-loader');
   }
@@ -1389,7 +1353,6 @@
     .then(function(r){ if(!r.ok) throw 0; return r.json(); })
     .then(function(j){
       LIVE=j;
-      // плашка: убираем "демо", пишем дату обновления
       var tag=document.querySelector('.demo-tag');
       if(tag){
         tag.textContent='данные из Битрикс';
@@ -1400,7 +1363,6 @@
         var sub=document.querySelector('.head p');
         if(sub) sub.textContent='Воронка из Битрикс · обновлено '+new Date(j.updated).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
       }
-      // заполняем выпадашку источников (берём полный список из периода "all")
       var sel=document.getElementById('source-filter');
       if(sel && j.periods && j.periods.all){
         var totalsByName={};
@@ -1428,22 +1390,19 @@
       hideLoader('trend-loader');
       hideLoader('src-loader');
       hideLoader('chleads-loader');
-    }); // нет файла — демо-режим
+    });
 
-  // ===== ВОРОНКА БОТА (salebot.json) =====
   var BOT_COLORS=['#2f6bff','#0891b2','#16a34a','#7c3aed'];
   var ENTRY_COLORS={'Личка':'#2f6bff','Комментарии':'#7c3aed'};
-  var botExpanded=false;  // раскрыт ли «Вход»
+  var botExpanded=false;
 
   function renderBot(){
     var host=document.getElementById('bot-funnel');
-    // данные бота за текущий период (с фолбэком на all, если нет нужного периода)
     var botBlk = null;
     if(BOT){
       if(BOT.periods){
         botBlk = BOT.periods[cur] || BOT.periods['all'] || null;
       } else if(BOT.funnel){
-        // совместимость со старой структурой (без periods)
         botBlk = BOT;
       }
     }
@@ -1468,7 +1427,6 @@
         '<div class="fc"><span class="fl"><span class="fdot" style="background:'+col+'"></span>'+st.step+
         pctLabel+expandLabel+'</span>'+
         '<span class="fv">'+fmt.format(v)+'</span></div></div>';
-      // раскрытые источники входа
       if(hasKids && botExpanded){
         st.children.forEach(function(ch){
           var cc=ENTRY_COLORS[ch.step]||'#8a91a0';
@@ -1480,11 +1438,9 @@
     }
     host.innerHTML=h;
 
-    // клик по «Входу» — раскрыть/свернуть
     var toggle=host.querySelector('[data-bot-toggle]');
     if(toggle) toggle.addEventListener('click',function(){ botExpanded=!botExpanded; renderBot(); });
 
-    // боковые исходы
     var sc='';
     if(botBlk && botBlk.side){
       botBlk.side.forEach(function(s){
@@ -1500,7 +1456,7 @@
   fetch('salebot.json', {cache:'no-store'})
     .then(function(r){ if(!r.ok) throw 0; return r.json(); })
     .then(function(j){ BOT=j; renderBot(); })
-    .catch(function(){ renderBot(); }); // нет файла — покажет "нет данных"
+    .catch(function(){ renderBot(); });
 </script>
 </body>
 </html>
