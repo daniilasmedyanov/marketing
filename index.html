@@ -714,16 +714,18 @@
   }
   function avitoLastFullIdx(av){
     var now = new Date();
-    var curY = now.getFullYear(), curM = now.getMonth() + 1;
+    var curY = now.getFullYear(), curM = now.getMonth() + 1, curD = now.getDate();
     var ruM = {'январь':1,'февраль':2,'март':3,'апрель':4,'май':5,'июнь':6,
                'июль':7,'август':8,'сентябрь':9,'октябрь':10,'ноябрь':11,'декабрь':12};
+    // если сегодня 20-е или позже — текущий месяц тоже считаем "полным"
+    var includeCurrent = curD >= 20;
     for(var i=av.months.length-1;i>=0;i--){
       if(!avitoMonthHasData(av,i)) continue;
       var p = String(av.months[i]).trim().split(/\s+/);
       var m = ruM[(p[0]||'').toLowerCase()] || 0;
       var y = parseInt(p[1]||'0', 10);
-      // месяц "полный" = строго раньше текущего
       if(y < curY || (y === curY && m < curM)) return i;
+      if(includeCurrent && y === curY && m === curM) return i;
     }
     return avitoLastMonthIdx(av);
   }
