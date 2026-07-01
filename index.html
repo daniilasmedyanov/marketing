@@ -1,1470 +1,381 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>VISUVA · Дашборд продаж</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<style>
-  :root{
-    --bg:#f4f5f7;
-    --surface:#ffffff;
-    --ink:#0f1115;
-    --ink-2:#3a4150;
-    --ink-3:#8a91a0;
-    --ink-4:#aab0bd;
-    --line:#e7e9ee;
-    --line-2:#eef0f4;
-    --blue:#2f6bff;
-    --blue-soft:#eaf0ff;
-    --green:#16a34a;
-    --green-soft:#e8f6ec;
-    --amber:#d97706;
-    --amber-soft:#fdf2e3;
-    --red:#dc2626;
-    --red-soft:#fde8e8;
-    --purple:#7c3aed;
-    --purple-soft:#f1ebfe;
-    --r-card:16px;
-    --shadow:0 1px 2px rgba(16,17,21,.04), 0 4px 16px rgba(16,17,21,.05);
-    --shadow-hover:0 2px 4px rgba(16,17,21,.06), 0 12px 32px rgba(16,17,21,.10);
-  }
-  *{margin:0;padding:0;box-sizing:border-box}
-  html{-webkit-text-size-adjust:100%}
-  body{
-    font-family:'Inter',system-ui,-apple-system,sans-serif;
-    background:var(--bg); color:var(--ink); min-height:100vh;
-    -webkit-font-smoothing:antialiased;
-  }
-
-  .topbar{
-    background:var(--surface); border-bottom:1px solid var(--line);
-    padding:0 clamp(16px,4vw,40px); height:60px;
-    display:flex; align-items:center; gap:14px;
-    position:sticky; top:0; z-index:10;
-  }
-  .logo{display:flex;align-items:center;text-decoration:none}
-  .logo svg{height:26px;width:auto;display:block}
-  .topnav{display:flex;align-items:center;gap:6px;margin-right:auto}
-  .topnav a{font-size:13px;font-weight:600;color:var(--ink-3);text-decoration:none;padding:7px 12px;border-radius:9px;transition:.16s}
-  .topnav a:hover{background:var(--bg);color:var(--ink-2)}
-  .topnav a.active{background:var(--blue-soft);color:var(--blue)}
-  .status{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--ink-3)}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--green);box-shadow:0 0 0 3px var(--green-soft)}
-
-  .wrap{max-width:1120px;margin:0 auto;padding:clamp(24px,4vw,44px) clamp(16px,4vw,40px) 80px}
-
-  .head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;flex-wrap:wrap;margin-bottom:clamp(22px,4vw,30px)}
-  .head h1{font-size:clamp(22px,3.4vw,28px);font-weight:700;letter-spacing:-.02em}
-  .head p{font-size:15px;color:var(--ink-3);margin-top:6px}
-
-  .periods{display:flex;gap:4px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:4px;box-shadow:var(--shadow)}
-  .pdf-btn{display:inline-flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:11px;padding:7px 14px;font-size:13px;font-weight:600;color:var(--ink-2);cursor:pointer;box-shadow:var(--shadow);transition:.15s;font-family:inherit}
-  .pdf-btn:hover{background:var(--blue);color:#fff;border-color:var(--blue)}
-  .pdf-btn:hover svg{stroke:#fff}
-  @media print {
-    body{-webkit-print-color-adjust:exact;print-color-adjust:exact;background:#fff}
-    .topbar, .periods, .pdf-btn, .loader, .demo-tag, .chan-switch, .source-filter, #avito-month, #funnel-mode, #roi-sort, #ch-leads-switch, #chan-switch { display: none !important; }
-    .panel { break-inside: avoid; page-break-inside: avoid; box-shadow: none; border: 1px solid #ddd; margin-bottom: 12px !important; }
-    .section-divider { margin: 16px 0 10px !important; page-break-before: auto; page-break-after: avoid; }
-    .chart-box { height: auto !important; min-height: 200px; }
-    .funnel-layout { grid-template-columns: 1fr 220px !important; }
-    .head { margin-bottom: 16px; }
-    .wrap { padding: 0; max-width: none; }
-    @page { margin: 12mm; size: A4; }
-  }
-  .periods button{
-    font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-3);
-    background:none;border:none;cursor:pointer;padding:7px 14px;border-radius:8px;transition:.16s;white-space:nowrap}
-  .periods button.active{background:var(--blue);color:#fff}
-  .periods button:not(.active):hover{color:var(--ink)}
-
-  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:16px;margin-bottom:clamp(20px,3vw,26px)}
-  .kpis.kpis-5{grid-template-columns:repeat(5,1fr);gap:12px}
-  .kpis.kpis-5 .kpi{padding:14px 14px}
-  .kpis.kpis-5 .kpi .k-val{font-size:22px;white-space:nowrap}
-  .kpis.kpis-5 .kpi .k-lab{font-size:11.5px}
-  .kpis.kpis-5 .kpi .k-sub{font-size:10.5px}
-  @media(max-width:1100px){.kpis.kpis-5{grid-template-columns:repeat(auto-fit,minmax(170px,1fr))}}
-  .kpi{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:18px 20px;box-shadow:var(--shadow)}
-  .kpi .k-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
-  .kpi .k-label{font-size:12.5px;font-weight:600;color:var(--ink-3)}
-  .kpi .k-lab{font-size:12.5px;font-weight:600;color:var(--ink-3);margin-bottom:10px}
-  .kpi .k-ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex:none}
-  .kpi .k-ico svg{width:17px;height:17px}
-  .kpi .k-val{font-size:26px;font-weight:700;letter-spacing:-.02em;line-height:1}
-  .kpi .k-sub{display:flex;align-items:center;gap:5px;margin-top:9px;font-size:12.5px;font-weight:600}
-  .k-up{color:var(--green)}.k-down{color:var(--red)}
-  .k-sub .muted{color:var(--ink-4);font-weight:500}
-
-  .row{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;margin-bottom:16px}
-  @media(max-width:860px){.row{grid-template-columns:1fr}}
-
-  .panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--r-card);padding:20px 22px;box-shadow:var(--shadow)}
-  .panel-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
-  .panel-head h2{font-size:15px;font-weight:700;letter-spacing:-.01em}
-  .panel-head .hint{font-size:12px;color:var(--ink-4);font-weight:500}
-
-  .chart-box{position:relative;height:260px}
-  .chart-box.sm{height:230px}
-  .loader{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--ink-4);font-size:13px;background:var(--surface);z-index:2;border-radius:10px;transition:opacity .2s}
-  .loader.hide{opacity:0;pointer-events:none}
-  .loader::before{content:"";width:28px;height:28px;border:2.5px solid var(--bg);border-top-color:var(--blue);border-radius:50%;animation:spin .8s linear infinite}
-  @keyframes spin{to{transform:rotate(360deg)}}
-  .funnel-skeleton{display:flex;flex-direction:column;gap:9px;padding:6px 0}
-  .funnel-skeleton .sk{height:46px;border-radius:10px;background:linear-gradient(90deg,#eef0f4 0%,#f5f6f8 50%,#eef0f4 100%);background-size:200% 100%;animation:shimmer 1.4s linear infinite}
-  @keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-
-  .funnel-cols{display:grid;grid-template-columns:1fr 1fr;gap:24px}
-  .source-filter{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink-2);background:var(--surface);border:1px solid var(--line);border-radius:9px;padding:7px 12px;cursor:pointer;outline:none;max-width:220px}
-  .chan-switch{display:flex;gap:4px;flex-wrap:wrap}
-  .chan-switch button{font-family:inherit;font-size:12.5px;font-weight:600;color:var(--ink-3);background:var(--bg);border:none;cursor:pointer;padding:6px 13px;border-radius:8px;transition:.15s}
-  .chan-switch button.active{background:var(--blue);color:#fff}
-  .source-filter:hover{border-color:var(--ink-4)}
-  @media(max-width:720px){.funnel-cols{grid-template-columns:1fr;gap:18px}}
-  .funnel-col-title{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:baseline;gap:8px}
-  .funnel-col-title span{font-size:11px;font-weight:500;color:var(--ink-4)}
-  .side-counters{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-  .funnel-layout{display:grid;grid-template-columns:minmax(0,640px) 1fr;gap:22px;align-items:start}
-  .funnel-layout .funnel{margin:0}
-  .side-right{margin-top:0;flex-direction:column;flex-wrap:nowrap}
-  .side-right .scount{flex:none;width:100%}
-  @media(max-width:820px){.funnel-layout{grid-template-columns:1fr}.side-right{flex-direction:row;flex-wrap:wrap;margin-top:14px}.side-right .scount{flex:1;width:auto}}
-  .scount{flex:1;min-width:90px;background:var(--bg);border-radius:10px;padding:10px 12px}
-  .scount .sc-v{font-size:18px;font-weight:700;letter-spacing:-.02em}
-  .scount .sc-l{font-size:11px;color:var(--ink-3);font-weight:600;margin-top:2px}
-  .scount.lose .sc-v{color:var(--red)}
-  .funnel{display:flex;flex-direction:column;gap:9px}
-  .funnel-group-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4);margin:6px 0 2px 2px}
-  .funnel-group-label:first-child{margin-top:0}
-  .fstep{position:relative;border-radius:10px;padding:13px 15px;overflow:hidden;transition:.18s}
-  .fstep .bar{position:absolute;inset:0;opacity:.13;border-radius:10px}
-  .fstep .fc{position:relative;display:flex;align-items:center;justify-content:space-between}
-  .fstep .fl{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:600}
-  .fstep .fl .fdot{width:9px;height:9px;border-radius:3px;flex:none}
-  .fstep .fv{font-size:15px;font-weight:700;letter-spacing:-.01em}
-  .fstep .fpct{font-size:11.5px;color:var(--ink-3);font-weight:600;margin-left:8px}
-  .fstep.link{cursor:pointer}
-  .fstep.link:hover{transform:translateX(2px)}
-  .fchild{display:flex;align-items:center;justify-content:space-between;padding:8px 15px 8px 34px;font-size:13px;color:var(--ink-2)}
-  .fchild .fl{display:flex;align-items:center;gap:8px}
-  .fchild .fdot{width:7px;height:7px;border-radius:2px;flex:none}
-  .fchild .fv{font-weight:700}
-  .fexpand{font-size:11px;color:var(--ink-4);margin-left:6px;font-weight:600}
-
-  .social-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px}
-  .scard{border:1px solid var(--line);border-radius:12px;padding:14px}
-  .scard .sh{display:flex;align-items:center;gap:8px;margin-bottom:11px}
-  .scard .sico{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;flex:none;color:#fff}
-  .scard .sico svg{width:15px;height:15px}
-  .scard .sname{font-size:13px;font-weight:600}
-  .scard .sreach{font-size:20px;font-weight:700;letter-spacing:-.02em}
-  .scard .smeta{font-size:11.5px;color:var(--ink-3);margin-top:3px}
-  .scard .sgrow{font-size:11.5px;font-weight:600;margin-top:7px}
-
-  .lead-table{width:100%;border-collapse:collapse;font-size:13.5px}
-  .lead-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-4);padding:0 10px 11px;border-bottom:1px solid var(--line)}
-  .lead-table td{padding:12px 10px;border-bottom:1px solid var(--line-2)}
-  .lead-table tr:last-child td{border-bottom:none}
-  .lead-table .lname{font-weight:600}
-  .lead-table .lsrc{color:var(--ink-3);font-size:12.5px}
-  .lead-table .lval{font-weight:700;text-align:right}
-  .roi-table{width:100%;border-collapse:collapse;font-size:13.5px}
-  .roi-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-4);padding:0 10px 11px;border-bottom:1px solid var(--line)}
-  .roi-table td{padding:11px 10px;border-bottom:1px solid var(--line-2)}
-  .roi-table tr:last-child td{border-bottom:none}
-  .roi-table .rname{font-weight:600;display:flex;align-items:center;gap:9px}
-  .roi-table .rdot{width:8px;height:8px;border-radius:2px;flex:none}
-  .roi-table .rnum{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .roi-table .rpct{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .roi-table .rbar{width:120px;padding-left:14px}
-  .roi-table .rbar-track{height:6px;background:var(--bg);border-radius:3px;overflow:hidden}
-  .roi-table .rbar-fill{height:100%;border-radius:3px;transition:width .25s}
-  .roi-table .rpct.hot{color:var(--green)}
-  .roi-table .rpct.warm{color:var(--amber)}
-  .roi-table .rpct.cold{color:var(--red)}
-  .st{font-size:11.5px;font-weight:600;padding:3px 10px;border-radius:7px;white-space:nowrap;display:inline-block}
-  .st.new{color:var(--blue);background:var(--blue-soft)}
-  .st.work{color:var(--amber);background:var(--amber-soft)}
-  .st.prod{color:var(--purple);background:var(--purple-soft)}
-  .st.won{color:var(--green);background:var(--green-soft)}
-
-  footer{margin-top:36px;font-size:12.5px;color:var(--ink-4);text-align:center}
-  .demo-tag{display:inline-block;font-size:11px;font-weight:600;color:var(--amber);background:var(--amber-soft);padding:3px 10px;border-radius:7px;margin-left:10px;vertical-align:middle}
-
-  .section-divider{display:flex;align-items:center;gap:14px;margin:32px 0 18px;padding:0 4px}
-  .section-divider-line{flex:1;height:1px;background:linear-gradient(to right, transparent, var(--line) 30%, var(--line) 70%, transparent)}
-  .section-divider-label{font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);padding:0 4px}
-  .events-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:6px}
-  .ecard{border:1px solid var(--line);border-radius:12px;padding:14px 16px;background:var(--surface)}
-  .ecard .elab{font-size:11.5px;color:var(--ink-3);font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:6px}
-  .ecard .eval{font-size:21px;font-weight:700;letter-spacing:-.02em}
-  .ecard .esub{font-size:11.5px;color:var(--ink-4);margin-top:3px}
-
-  .events-table{width:100%;border-collapse:collapse;font-size:13.5px}
-  .events-table th{text-align:left;font-size:11px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--ink-4);padding:0 10px 11px;border-bottom:1px solid var(--line)}
-  .events-table td{padding:12px 10px;border-bottom:1px solid var(--line-2)}
-  .events-table tr:last-child td{border-bottom:none}
-  .events-table tr.clickable{cursor:pointer;transition:.15s}
-  .events-table tr.clickable:hover{background:var(--bg)}
-  .events-table .ename{font-weight:600}
-  .events-table .esub-row{color:var(--ink-3);font-size:11.5px;margin-top:1px}
-  .events-table .enum{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .events-table .emoney{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;white-space:nowrap}
-  .events-table .ecpl-good{color:var(--green)}
-  .events-table .ecpl-mid{color:var(--amber)}
-  .events-table .ecpl-bad{color:var(--red)}
-  .events-table .ecpl-na{color:var(--ink-4);font-weight:500}
-
-  .events-detail{margin-top:18px;padding:18px;border:1px solid var(--line);border-radius:12px;background:var(--bg)}
-  .events-detail-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
-  .events-detail-head span{font-size:14px;font-weight:700}
-  .events-detail-close{border:none;background:transparent;font-size:22px;color:var(--ink-3);cursor:pointer;padding:0 6px;line-height:1}
-  .events-detail-close:hover{color:var(--ink)}
-  .events-detail-table{width:100%;border-collapse:collapse;font-size:13px}
-  .events-detail-table th{text-align:left;font-size:10.5px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-4);padding:0 8px 9px;border-bottom:1px solid var(--line)}
-  .events-detail-table td{padding:9px 8px;border-bottom:1px solid var(--line-2)}
-  .events-detail-table tr:last-child td{border-bottom:none}
-  .events-detail-table .dnum{text-align:right;font-variant-numeric:tabular-nums;font-weight:600}
-  .events-detail-table .dpct{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink-3);font-size:12px}
-  .events-detail-table .dcomment{color:var(--ink-3);font-size:12px}
-
-  @media(max-width:540px){.head{align-items:flex-start}.topnav a:not(.active){display:none}}
-</style>
-</head>
-<body>
-
-  <div class="topbar">
-    <a class="logo" href="#" aria-label="VISUVA">
-      <svg viewBox="0 0 1192 159" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="VISUVA">
-        <g clip-path="url(#vlogo_clip)">
-        <path d="M259.007 40.21H239.797V157.51H259.007V40.21Z" fill="#191718"/>
-        <path d="M487.313 99.1801C484.219 96.0943 480.572 93.618 476.563 91.8801C472.353 90.0715 467.815 89.1523 463.233 89.1801H319.513C317.575 89.1913 315.654 88.8189 313.86 88.0844C312.067 87.3498 310.436 86.2676 309.063 84.9001C307.696 83.5098 306.598 81.8792 305.823 80.0901C305.028 78.2639 304.622 76.2919 304.633 74.3001C304.612 72.3332 305.018 70.3852 305.823 68.5901C307.401 65.0208 310.253 62.1683 313.823 60.5901C315.614 59.7857 317.559 59.3797 319.523 59.4001H490.453V40.2101H319.513C314.961 40.1964 310.455 41.1153 306.273 42.9101C298.115 46.3683 291.613 52.8518 288.133 61.0001C286.312 65.2101 285.389 69.7534 285.423 74.3401C285.398 78.9411 286.317 83.4983 288.123 87.7301C291.574 95.9155 298.087 102.429 306.273 105.88C310.455 107.676 314.961 108.595 319.513 108.58H463.233C465.206 108.566 467.162 108.951 468.983 109.71C470.733 110.45 472.326 111.519 473.673 112.86C475.044 114.243 476.143 115.871 476.913 117.66C477.715 119.488 478.124 121.464 478.113 123.46C478.127 125.423 477.722 127.367 476.923 129.16C475.349 132.733 472.495 135.587 468.923 137.16C467.134 137.961 465.193 138.364 463.233 138.34H292.233V157.55H463.233C467.816 157.582 472.356 156.659 476.563 154.84C484.696 151.351 491.164 144.851 494.613 136.7C496.407 132.517 497.326 128.011 497.313 123.46C497.336 118.856 496.417 114.296 494.613 110.06C492.894 106.002 490.416 102.309 487.313 99.1801Z" fill="#191718"/>
-        <path d="M715.771 138.3H582.221C576.96 138.338 571.749 137.279 566.921 135.19C562.247 133.17 557.996 130.286 554.391 126.69C550.799 123.079 547.913 118.83 545.881 114.16C543.799 109.33 542.74 104.12 542.771 98.86V40.21H523.571V98.86C523.536 106.698 525.105 114.461 528.181 121.67C534.123 135.75 545.329 146.952 559.411 152.89C566.617 155.976 574.381 157.549 582.221 157.51H735.001V40.21H715.771V138.3Z" fill="#191718"/>
-        <path d="M867.101 130.58L783.961 40.21H757.781L867.101 158.85L976.591 40.21H950.401L867.101 130.58Z" fill="#191718"/>
-        <path d="M1186.71 75.9998C1183.75 69.0885 1179.52 62.7907 1174.25 57.4298C1168.91 52.0828 1162.6 47.8149 1155.65 44.8598C1148.44 41.7837 1140.68 40.2149 1132.84 40.2498H1038.57C1030.75 40.2083 1023.01 41.7811 1015.83 44.8698C1001.82 50.8414 990.671 61.9954 984.699 75.9998C981.609 83.1808 980.037 90.9226 980.079 98.7398V157.55H999.279V121.62H1172.13V157.51H1191.33V98.6998C1191.36 90.8962 1189.79 83.169 1186.71 75.9998ZM1172.13 98.6998V102.41H999.279V98.6998C999.254 93.4911 1000.32 88.3345 1002.4 83.5598C1006.46 74.1371 1013.98 66.6245 1023.4 62.5598C1028.17 60.4788 1033.33 59.4162 1038.54 59.4398H1132.81C1138.07 59.4051 1143.28 60.4677 1148.11 62.5598C1152.78 64.5849 1157.03 67.4681 1160.64 71.0598C1164.22 74.6527 1167.07 78.8997 1169.05 83.5698C1171.09 88.3524 1172.14 93.4999 1172.13 98.6998Z" fill="#191718"/>
-        <path d="M112.48 140.44L110.27 138.04L110.25 138.03L108.66 136.3L102.71 129.86L102.67 129.82L100.46 127.44L89.5 115.58L89.46 115.63L73.22 97.9699L72.38 97.0599L19.53 39.6099H0L108.57 157.44L118.37 146.82V146.81L112.49 140.44H112.48Z" fill="#191718"/>
-        <path d="M138.93 39.6099L180.61 79.3499L180.8 79.1499L181 78.9999L181.71 78.2299L217.3 39.6099H138.93Z" fill="#191718"/>
-        <path d="M141.477 138.74L133.337 130.59L123.237 120.47L103.087 100.28L95.0875 92.21L94.6675 91.79L79.3475 76.5L23.4375 20.5L77.6075 81.63L93.4575 99.51L93.9275 100.04L98.6075 105.31L117.527 126.66L126.997 137.42L132.587 143.72L137.287 149.02L137.757 149.56C138.607 149.56 139.458 149.63 140.318 149.63C143.937 149.634 147.545 149.214 151.068 148.38L150.647 147.97L141.477 138.74Z" fill="#191718"/>
-        <path d="M168.999 139.23L158.839 129L146.379 116.47L136.299 106.32L115.909 85.8398L103.909 73.7698L103.559 73.4198L86.2794 55.9998L33.3594 2.83984L84.7294 60.6198L100.269 78.0998L100.619 78.4898L111.529 90.7698L130.729 112.36L140.269 123.08L149.999 134L159.719 144.93L160.079 145.32C163.407 143.783 166.542 141.86 169.419 139.59L169.069 139.24L168.999 139.23Z" fill="#191718"/>
-        <path d="M175.863 119.43L159.163 102.62L149.063 92.46L128.463 71.72L118.463 61.63L118.093 61.25L102.533 45.62L57.2031 0L99.3631 47.37L114.003 63.76L114.343 64.14L124.803 75.89L144.203 97.74L153.753 108.48L167.623 124.06L175.563 132.99L175.893 133.36C178.078 130.85 179.989 128.115 181.593 125.2L181.213 124.82L175.863 119.43Z" fill="#191718"/>
-        <path d="M171.753 88.9998L161.623 78.8398L140.713 57.9198L138.933 56.1398L138.443 55.6598L119.183 36.3898L98.3828 15.5898L117.563 37.2898L134.133 55.9998L134.523 56.4498L138.253 60.6598L157.883 82.8998L167.413 93.6698L185.413 114.06L185.813 114.52C185.893 114.25 185.953 113.99 186.013 113.71C186.749 110.708 187.181 107.639 187.303 104.55L186.813 104.06L171.753 88.9998Z" fill="#191718"/>
-        </g>
-        <defs><clipPath id="vlogo_clip"><rect width="1191.33" height="158.85" fill="white"/></clipPath></defs>
-      </svg>
-    </a>
-    <nav class="topnav">
-      <a href="#" class="active">Маркетинг и продажи</a>
-    </nav>
-    <div class="status"><span class="dot"></span><span id="clock">—</span></div>
-  </div>
-
-  <div class="wrap">
-
-    <div class="head">
-      <div>
-        <h1>Продажи и лиды<span class="demo-tag">демо-данные</span></h1>
-        <p>Соцсети, воронка лидов и связь со заказами в производстве</p>
-      </div>
-      <div class="periods" id="periods">
-        <button data-p="week">Неделя</button>
-        <button data-p="month">Месяц</button>
-        <button data-p="quarter">Квартал</button>
-        <button data-p="year">Год</button>
-        <button data-p="all" class="active">Всё</button>
-      </div>
-      <button id="pdf-btn" class="pdf-btn" title="Сохранить страницу как PDF">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="12" y1="18" x2="12" y2="12"/><polyline points="9 15 12 18 15 15"/></svg>
-        PDF
-      </button>
-    </div>
-
-    <div class="kpis" id="kpis"></div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Динамика во времени</h2>
-        <span class="hint">новые лиды и сделки по неделям</span>
-      </div>
-      <div class="chart-box" style="height:260px"><div class="loader" id="trend-loader">загружаю динамику</div><canvas id="trendChart"></canvas></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Воронка продаж</h2>
-        <div style="display:flex;gap:10px;align-items:center">
-          <div class="chan-switch" id="funnel-mode">
-            <button data-m="funnel" class="active">Воронка</button>
-            <button data-m="snapshot">Слепок</button>
-          </div>
-          <select id="source-filter" class="source-filter"><option value="__all__">Все источники</option></select>
-        </div>
-      </div>
-      <div class="funnel-layout">
-        <div class="funnel" id="funnel-single"><div class="funnel-skeleton"><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div><div class="sk"></div></div></div>
-        <div class="side-counters side-right" id="side-counters"></div>
-      </div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Воронка бота</h2>
-        <span class="hint">первичное общение · до Битрикса · % от входа</span>
-      </div>
-      <div class="funnel-layout">
-        <div class="funnel" id="bot-funnel"><div class="funnel-skeleton"><div class="sk"></div><div class="sk"></div><div class="sk"></div></div></div>
-        <div class="side-counters side-right" id="bot-side"></div>
-      </div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Источники лидов</h2>
-        <span class="hint">доля заявок</span>
-      </div>
-      <div class="chart-box sm"><div class="loader" id="src-loader">загружаю источники</div><canvas id="srcChart" role="img" aria-label="Круговая диаграмма источников лидов"></canvas></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Окупаемость каналов</h2>
-        <div class="chan-switch" id="roi-sort">
-          <button data-s="conv">По конверсии</button>
-          <button data-s="total" class="active">По заявкам</button>
-        </div>
-      </div>
-      <table class="roi-table">
-        <thead><tr><th>Канал</th><th style="text-align:right">Заявок</th><th style="text-align:right">В сделку</th><th style="text-align:right">Конверсия</th><th></th></tr></thead>
-        <tbody id="roi-tbody"></tbody>
-      </table>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Канал и лиды</h2>
-        <div class="chan-switch" id="ch-leads-switch"></div>
-      </div>
-      <div class="chart-box" style="height:280px"><div class="loader" id="chleads-loader">ждём соцсети и лиды</div><canvas id="chLeadsChart"></canvas></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Социальные сети</h2>
-        <div class="chan-switch" id="chan-switch"></div>
-      </div>
-      <div class="chart-box" style="height:300px"><div class="loader" id="smm-loader">загружаю данные соцсетей<span style="font-size:11px;color:var(--ink-4)">из Google-таблицы (может занять до 10 секунд)</span></div><canvas id="smmChart"></canvas></div>
-      <div class="social-grid" id="social" style="margin-top:16px"></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Авито</h2>
-        <select id="avito-month" class="source-filter"></select>
-      </div>
-      <div class="kpis kpis-5" id="avito-kpis"></div>
-      <div class="chart-box" style="height:240px;margin-top:14px"><div class="loader" id="avito-loader">загружаю данные Авито</div><canvas id="avitoChart"></canvas></div>
-    </div>
-
-    <div class="panel">
-      <div class="panel-head">
-        <h2>Авито · регионы</h2>
-        <span class="hint" id="avito-regions-label"></span>
-      </div>
-      <table class="roi-table">
-        <thead><tr>
-          <th>Регион</th>
-          <th style="text-align:right">Показы</th>
-          <th style="text-align:right">Просмотры</th>
-          <th style="text-align:right">Контакты</th>
-          <th style="text-align:right">Цена контакта</th>
-          <th style="text-align:right">CTR</th>
-        </tr></thead>
-        <tbody id="avito-regions"></tbody>
-      </table>
-    </div>
-
-    <div class="section-divider">
-      <div class="section-divider-line"></div>
-      <div class="section-divider-label">Эффективность мероприятий</div>
-      <div class="section-divider-line"></div>
-    </div>
-
-    <div class="panel" style="margin-bottom:16px">
-      <div class="panel-head">
-        <h2>Мероприятия</h2>
-        <span class="hint" id="events-summary"></span>
-      </div>
-      <div id="events-cards" class="events-cards"></div>
-      <table class="events-table" style="margin-top:18px">
-        <thead><tr>
-          <th>Мероприятие</th>
-          <th>Дата</th>
-          <th>Город</th>
-          <th style="text-align:right">Бюджет</th>
-          <th style="text-align:right">Контакты</th>
-          <th style="text-align:right">Квал</th>
-          <th style="text-align:right">В работе</th>
-          <th style="text-align:right">КП/Договор</th>
-          <th style="text-align:right">Сделки</th>
-          <th style="text-align:right">CPL</th>
-          <th style="text-align:right">CPA</th>
-        </tr></thead>
-        <tbody id="events-rows"></tbody>
-      </table>
-      <div id="events-detail" class="events-detail" style="display:none">
-        <div class="events-detail-head">
-          <span id="events-detail-title"></span>
-          <button class="events-detail-close" onclick="closeEventDetail()">×</button>
-        </div>
-        <table class="events-detail-table">
-          <thead><tr>
-            <th>Статья</th>
-            <th>Подкатегория</th>
-            <th style="text-align:right">Сумма</th>
-            <th style="text-align:right">%</th>
-            <th>Комментарий</th>
-          </tr></thead>
-          <tbody id="events-detail-rows"></tbody>
-        </table>
-      </div>
-    </div>
-
-    <footer>VISUVA · дашборд продаж · данные демонстрационные, подключаются к CRM и рекламным кабинетам</footer>
-
-  </div>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script>
-  function tick(){var d=new Date();document.getElementById('clock').textContent=d.toLocaleTimeString('ru-RU',{hour:'2-digit',minute:'2-digit'});}
-  tick(); setInterval(tick,30000);
-
-  var fmt=new Intl.NumberFormat('ru-RU');
-  function money(v){return fmt.format(Math.round(v))+' \u20bd';}
-  function money_k(v){return v>=1e6?(v/1e6).toFixed(1).replace('.',',')+' \u043c\u043b\u043d':Math.round(v/1e3)+'\u202f\u0442\u044b\u0441';}
-
-  var EMPTY={
-      kpi:{revenue:0, deals:0, leads:0, conv:0, avg:0, reachTotal:0},
-      funnel:[0,0,0,0,0],
-      social:{inst:{r:0,g:0},tg:{r:0,g:0},vk:{r:0,g:0},tt:{r:0,g:0}},
-      leads:[],
-      src:[]
-  };
-  var DATA={ all:EMPTY, week:EMPTY, month:EMPTY, quarter:EMPTY, year:EMPTY };
-
-  var FUNNEL_LABELS=['\u041b\u0438\u0434\u044b','\u041a\u0432\u0430\u043b\u0438\u0444\u0438\u0446\u0438\u0440\u043e\u0432\u0430\u043d\u044b','\u041a\u041f / \u043f\u0435\u0440\u0435\u0433\u043e\u0432\u043e\u0440\u044b','\u0421\u0434\u0435\u043b\u043a\u0430','\u0412 \u043f\u0440\u043e\u0438\u0437\u0432\u043e\u0434\u0441\u0442\u0432\u0435'];
-  var FUNNEL_COLORS=['#2f6bff','#7c3aed','#d97706','#16a34a','#0891b2'];
-
-  var LIVE=null;
-  var SOC={
-    inst:{name:'Instagram',c:'#e1306c',ic:'<path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><rect x="2" y="2" width="20" height="20" rx="5"/><line x1="17.5" y1="6.5" x2="17.5" y2="6.5"/>'},
-    tg:{name:'Telegram',c:'#1d8fd1',ic:'<path d="m22 2-7 20-4-9-9-4Z"/><path d="M22 2 11 13"/>'},
-    vk:{name:'VK',c:'#0077ff',ic:'<path d="M3 5h18v14H3z"/><path d="m7 9 5 6 5-6"/>'},
-    tt:{name:'TikTok',c:'#111',ic:'<path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5"/>'}
-  };
-
-  var srcChart, cur='all', curSource='__all__', curMode='funnel', roiSort='total';
-
-  function periodBlock(){
-    if(!LIVE || !LIVE.periods) return null;
-    return LIVE.periods[cur] || LIVE.periods['all'] || null;
-  }
-
-  function kpiCard(label,val,sub,subClass,ico,icoColor,icoBg){
-    return '<div class="kpi"><div class="k-top"><span class="k-label">'+label+'</span>'+
-      '<span class="k-ico" style="background:'+icoBg+';color:'+icoColor+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'+ico+'</svg></span></div>'+
-      '<div class="k-val">'+val+'</div>'+
-      '<div class="k-sub '+subClass+'">'+sub+'</div></div>';
-  }
-
-  function render(p){
-    var d=DATA[p];
-    var k=d.kpi;
-    var arrowUp='<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m6 15 6-6 6 6"/></svg>';
-
-    var EMPTY_SRC={total:0,funnel:[],snapshot:[],side:[]};
-    function dealsData(){
-      var pb=periodBlock();
-      if(!pb || !pb.deals) return null;
-      if(curSource && curSource!=='__all__'){
-        var found=(pb.deals.by_source||[]).filter(function(s){return s.name===curSource;})[0];
-        return found || EMPTY_SRC;
-      }
-      return pb.deals;
-    }
-    function leadsData(){
-      var pb=periodBlock();
-      if(!pb || !pb.leads) return null;
-      if(curSource && curSource!=='__all__'){
-        var found=(pb.leads.by_source||[]).filter(function(s){return s.name===curSource;})[0];
-        return found || EMPTY_SRC;
-      }
-      return pb.leads;
-    }
-
-    var dealsVal=k.deals, leadsVal=k.leads;
-    if(LIVE){
-      var dd0=dealsData();
-      if(dd0 && dd0.funnel && dd0.funnel[0]) dealsVal=dd0.funnel[0].count;
-      var ld0=leadsData();
-      if(ld0 && ld0.funnel && ld0.funnel[0]) leadsVal=ld0.funnel[0].count;
-    }
-    var reachTotal=0, reachGrow=0;
-    if(smmData && smmData.smm){
-      smmData.smm.forEach(function(ch){
-        var subs=ch.subscribers||[], grow=ch.growth||[];
-        var lf=lastFilled(subs);
-        if(lf.idx>=0){
-          reachTotal+=lf.value;
-          if(grow[lf.idx]) reachGrow+=Number(grow[lf.idx].value)||0;
+{
+  "updated": "2026-06-30T17:17:31",
+  "periods": {
+    "week": {
+      "funnel": [
+        {
+          "step": "Вход в бота",
+          "count": 22,
+          "conv": null,
+          "native": "Личка + Пришли с комментариев",
+          "children": [
+            {
+              "step": "Личка",
+              "count": 5,
+              "native": "Заинтересовались"
+            },
+            {
+              "step": "Комментарии",
+              "count": 0,
+              "native": "Пришли с комментариев"
+            }
+          ]
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 16,
+          "conv": 73,
+          "children": null,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 0,
+          "conv": 0,
+          "children": null,
+          "native": "Захотели связаться с менеджером"
         }
-      });
-    }
-    var reachTxt = reachTotal>0 ? fmt.format(reachTotal) : '0';
-    var reachSub = reachTotal>0 ? ('<span class="'+(reachGrow>0?'k-up':'muted')+'">'+(reachGrow>0?('+'+fmt.format(reachGrow)+' за месяц'):'подписчиков')+'</span>') : '<span class="muted">нет данных</span>';
-    document.getElementById('kpis').innerHTML=
-      kpiCard('\u0421\u0434\u0435\u043b\u043a\u0438',dealsVal,'<span class="muted">\u0432\u043e\u0448\u043b\u043e \u0432 \u0432\u043e\u0440\u043e\u043d\u043a\u0443</span>','','<path d="M20 6 9 17l-5-5"/>',
-        'var(--blue)','var(--blue-soft)')+
-      kpiCard('\u041b\u0438\u0434\u044b',leadsVal,'<span class="muted">\u0432\u0441\u0435\u0433\u043e \u043b\u0438\u0434\u043e\u0432</span>','','<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
-        'var(--purple)','var(--purple-soft)')+
-      kpiCard('\u041f\u043e\u0434\u043f\u0438\u0441\u0447\u0438\u043a\u0438',reachTxt,reachSub,'','<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>','var(--blue)','var(--blue-soft)');
-
-    var LEAD_COLORS=['#0891b2','#0e9488','#16a34a'];
-
-
-    function buildChain(whichMetric){
-      var html='';
-      if(LIVE){
-        var dd=dealsData();
-        var ld=leadsData();
-        var leadArr = (ld && ld[whichMetric]) ? ld[whichMetric] : [];
-        var dealArr = (dd && dd[whichMetric]) ? dd[whichMetric] : [];
-
-        function rowsHtml(arr, palette){
-          var gmax = Math.max.apply(null, arr.map(function(x){return x.count;}).concat([1]));
-          var h='';
-          for(var i=0;i<arr.length;i++){
-            var v=arr[i].count;
-            var pct = v>0 ? Math.max(Math.round(v/gmax*100), 4) : 0;
-            var showPct = whichMetric==='funnel' && i>0;
-            var conv = arr[i].conv;
-            var pctVal = (conv!=null) ? conv : (arr[i-1] && arr[i-1].count ? Math.round(v/arr[i-1].count*100) : 0);
-            var col=palette[i % palette.length];
-            var nat = arr[i].native ? ' title="В Битриксе: '+arr[i].native.replace(/"/g,'&quot;')+'"' : '';
-            h+='<div class="fstep"'+nat+'>'+
-              '<div class="bar" style="background:'+col+';width:'+pct+'%"></div>'+
-              '<div class="fc"><span class="fl"><span class="fdot" style="background:'+col+'"></span>'+arr[i].step+
-              (showPct?'<span class="fpct">'+pctVal+'% \u0438\u0437 \u043f\u0440\u0435\u0434\u044b\u0434.</span>':'')+'</span>'+
-              '<span class="fv">'+fmt.format(v)+'</span></div></div>';
-          }
-          return h;
+      ],
+      "snapshot": [
+        {
+          "step": "Личка",
+          "count": 5,
+          "native": "Заинтересовались"
+        },
+        {
+          "step": "Комментарии",
+          "count": 0,
+          "native": "Пришли с комментариев"
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 16,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 0,
+          "native": "Захотели связаться с менеджером"
         }
-        if(leadArr.length) html+='<div class="funnel-group-label">Лиды</div>'+rowsHtml(leadArr, LEAD_COLORS);
-        if(dealArr.length) html+='<div class="funnel-group-label">Сделки</div>'+rowsHtml(dealArr, FUNNEL_COLORS);
-        if(!leadArr.length && !dealArr.length) html='<div style="text-align:center;color:var(--ink-4);padding:24px 0">нет данных по этому источнику</div>';
-      } else {
-        var f=d.funnel, max=Math.max.apply(null,f.concat([1]));
-        for(var i=0;i<f.length;i++){
-          var pct=Math.round(f[i]/max*100);
-          var col=FUNNEL_COLORS[i % FUNNEL_COLORS.length];
-          html+='<div class="fstep"><div class="bar" style="background:'+col+';width:'+Math.max(pct,18)+'%"></div>'+
-            '<div class="fc"><span class="fl"><span class="fdot" style="background:'+col+'"></span>'+FUNNEL_LABELS[i]+'</span>'+
-            '<span class="fv">'+fmt.format(f[i])+'</span></div></div>';
+      ],
+      "side": [
+        {
+          "label": "Отказ",
+          "count": 1,
+          "native": "Отказ"
+        },
+        {
+          "label": "Случайные",
+          "count": 0,
+          "native": "Сотрудничество / Случайные срабатывания"
+        },
+        {
+          "label": "Игнор",
+          "count": 0,
+          "native": "Игнор"
         }
-      }
-      return html;
-    }
-
-    document.getElementById('funnel-single').innerHTML = buildChain(curMode);
-
-    var sc='';
-    if(LIVE){
-      var dd2=dealsData();
-      var sideAll = [];
-      var ld3=leadsData();
-      if(ld3 && ld3.side) sideAll = sideAll.concat(ld3.side);
-      if(dd2 && dd2.side) sideAll = sideAll.concat(dd2.side);
-      sideAll.forEach(function(s){
-        var lose = /провал|некач/i.test(s.label);
-        var nat = s.native ? ' title="В Битриксе: '+s.native.replace(/"/g,'&quot;')+'"' : '';
-        sc+='<div class="scount'+(lose?' lose':'')+'"'+nat+'><div class="sc-v">'+fmt.format(s.count)+'</div><div class="sc-l">'+s.label+'</div></div>';
-      });
-    }
-    document.getElementById('side-counters').innerHTML=sc;
-
-    drawSrc(d);
-    renderRoi();
-    renderTrend();
-    renderChLeads();
-    if(typeof renderBot==='function') renderBot();
-  }
-
-  function chanToSource(chanName){
-    var n=(chanName||'').toLowerCase();
-    if(n.indexOf('inst')>=0) return 'Instagram Visuva';
-    if(n.indexOf('vk')>=0) return 'VK Visuva';
-    if(n.indexOf('you')>=0) return 'YouTube Visuva';
-    if(n.indexOf('tele')>=0||n.indexOf('tg')>=0) return 'Telegram Visuva';
-    return chanName;
-  }
-  var chLeadsChart=null, curChLeads=0;
-
-  function renderChLeads(){
-    if(!smmData || !smmData.smm) return;
-    var channels=smmData.smm;
-    var sw=document.getElementById('ch-leads-switch');
-    sw.innerHTML='';
-    channels.forEach(function(ch,i){
-      var b=document.createElement('button');
-      b.textContent=ch.name;
-      if(i===curChLeads) b.className='active';
-      b.onclick=function(){ curChLeads=i; renderChLeads(); };
-      sw.appendChild(b);
-    });
-
-    var ch=channels[curChLeads];
-    var growArr=ch.growth||[];
-    var subsArr=ch.subscribers||[];
-    var lf=lastFilled(subsArr);
-    var cut=lf.idx>=0?lf.idx+1:subsArr.length;
-    var months=growArr.slice(0,cut).map(function(x){return x.month;});
-    var growData=growArr.slice(0,cut).map(function(x){return x.value;});
-
-    var srcName=chanToSource(ch.name);
-    var leadsMap={};
-    if(LIVE && LIVE.leads_monthly_by_source && LIVE.leads_monthly_by_source[srcName]){
-      LIVE.leads_monthly_by_source[srcName].forEach(function(p){ leadsMap[p.month]=p.count; });
-    }
-    var ruM={'январь':'01','февраль':'02','март':'03','апрель':'04','май':'05','июнь':'06','июль':'07','август':'08','сентябрь':'09','октябрь':'10','ноябрь':'11','декабрь':'12'};
-    function monthKey(human){
-      var p=String(human).trim().split(/\s+/);
-      var nm=ruM[(p[0]||'').toLowerCase()]||'';
-      return (p[1]||'')+'-'+nm;
-    }
-    var leadsData=months.map(function(m){return leadsMap[monthKey(m)]||0;});
-
-    var reachLine = months.map(function(){return 0;});
-    var lineLabel = 'Прирост подписчиков';
-    if(reachData && reachData.channels){
-      var rch = reachData.channels.filter(function(x){
-        var a=String(x.name||'').toLowerCase(), b=String(ch.name||'').toLowerCase();
-        if(b.indexOf('inst')>=0 && a.indexOf('inst')>=0) return true;
-        if(b.indexOf('vk')>=0  && a.indexOf('vk')>=0)  return true;
-        if(b.indexOf('you')>=0 && a.indexOf('you')>=0) return true;
-        if(b.indexOf('tele')>=0 && a.indexOf('tele')>=0) return true;
-        return a===b;
-      })[0];
-      if(rch){
-        var rmap={};
-        (rch.reach||[]).forEach(function(p){ rmap[p.month]=p.value; });
-        reachLine = months.map(function(m){ var v=rmap[m]; return (v===null||v===undefined)?null:v; });
-        lineLabel = rch.metric || 'Охват';
-      }
-    }
-
-    var col=chanColor(ch.name);
-    var labels=months.map(function(m){return shortMonth(m);});
-
-    if(chLeadsChart) chLeadsChart.destroy();
-    chLeadsChart=new Chart(document.getElementById('chLeadsChart'),{
-      data:{labels:labels, datasets:[
-        {type:'bar',label:'Лиды с этого канала',data:leadsData,backgroundColor:col,borderRadius:5,maxBarThickness:40,yAxisID:'y1',order:2},
-        {type:'line',label:lineLabel,data:reachLine,borderColor:'#3a4150',backgroundColor:'#3a4150',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1,spanGaps:true}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
-          tooltip:{callbacks:{label:function(c){return '  '+c.dataset.label+': '+fmt.format(c.raw);}}}},
-        scales:{
-          y:{position:'left',grid:{color:'#eef0f4'},border:{display:false},beginAtZero:true,ticks:{color:'#8a91a0',font:{size:11},callback:function(v){return fmt.format(v);}}},
-          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,ticks:{color:'#8a91a0',font:{size:11},precision:0}},
-          x:{grid:{display:false},border:{display:false},ticks:{color:'#8a91a0',font:{size:11}}}
-        }}
-    });
-  }
-
-  // ===== АВИТО: новый формат данных =====
-  // av.months: ["Май 2025", ...]
-  // av.metrics.{ads,budget,spend,shows,views,contacts,price_view,price_contact}
-  //   .total: [...]
-  //   .breakdown: {"S2 Москва":[...], "Т8 Грозный":[...], ...}  (есть не у всех)
-  //   .byCity: {"Москва":[...], ...}  (только для не-средних)
-  var avitoChart=null;
-  var avitoSelectedIdx=null;
-
-  function avitoTotal(av, key, idx){
-    var m=av.metrics && av.metrics[key];
-    if(!m || !m.total) return null;
-    var v=m.total[idx];
-    return (v==null) ? null : v;
-  }
-  function avitoBd(av, key, name, idx){
-    var m=av.metrics && av.metrics[key];
-    if(!m || !m.breakdown || !m.breakdown[name]) return null;
-    var v=m.breakdown[name][idx];
-    return (v==null) ? null : v;
-  }
-  function avitoMonthHasData(av, i){
-    var sh=avitoTotal(av,'shows',i), ct=avitoTotal(av,'contacts',i);
-    return (sh!=null && sh>0) || (ct!=null && ct>0);
-  }
-  function avitoLastMonthIdx(av){
-    for(var i=av.months.length-1;i>=0;i--) if(avitoMonthHasData(av,i)) return i;
-    return -1;
-  }
-  function avitoLastFullIdx(av){
-    var now = new Date();
-    var curY = now.getFullYear(), curM = now.getMonth() + 1, curD = now.getDate();
-    var ruM = {'январь':1,'февраль':2,'март':3,'апрель':4,'май':5,'июнь':6,
-               'июль':7,'август':8,'сентябрь':9,'октябрь':10,'ноябрь':11,'декабрь':12};
-    // если сегодня 20-е или позже — текущий месяц тоже считаем "полным"
-    var includeCurrent = curD >= 20;
-    for(var i=av.months.length-1;i>=0;i--){
-      if(!avitoMonthHasData(av,i)) continue;
-      var p = String(av.months[i]).trim().split(/\s+/);
-      var m = ruM[(p[0]||'').toLowerCase()] || 0;
-      var y = parseInt(p[1]||'0', 10);
-      if(y < curY || (y === curY && m < curM)) return i;
-      if(includeCurrent && y === curY && m === curM) return i;
-    }
-    return avitoLastMonthIdx(av);
-  }
-  function avitoFmtRub(v){
-    if(v==null||v===0) return '\u2014';
-    if(v>=1000000) return (Math.round(v/100000)/10).toLocaleString('ru-RU')+' \u043c\u043b\u043d \u20bd';
-    if(v>=1000) return Math.round(v/1000)+'\u043a \u20bd';
-    return Math.round(v)+' \u20bd';
-  }
-  // "S2 Москва" -> модель S2 (цвет), "Т8 Грозный" -> модель T8
-  function avitoModel(name){
-    var n=String(name||'').toLowerCase();
-    if(/^s2\b|^ѕ2\b/i.test(name)) return 'S2';
-    if(/^t8\b|^т8\b/i.test(name)) return 'T8';
-    return '';
-  }
-
-  function renderAvito(){
-    if(!reachData || !reachData.avito){ hideLoader('avito-loader'); return; }
-    var av=reachData.avito;
-    if(!av.months || !av.metrics){ hideLoader('avito-loader'); return; }
-
-    var sel=document.getElementById('avito-month');
-    if(sel && !sel.dataset.filled){
-      var defaultIdx = avitoLastFullIdx(av);
-      var indices=[];
-      for(var k=0;k<av.months.length;k++){
-        if(avitoMonthHasData(av,k)) indices.push(k);
-      }
-      indices.reverse();
-      sel.innerHTML = indices.map(function(i){
-        var s = av.months[i] + (i===defaultIdx?' \u00b7 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u043f\u043e\u043b\u043d\u044b\u0439':'');
-        return '<option value="'+i+'"'+(i===defaultIdx?' selected':'')+'>'+s+'</option>';
-      }).join('');
-      sel.dataset.filled='1';
-      sel.addEventListener('change', function(){
-        avitoSelectedIdx = parseInt(this.value, 10);
-        renderAvito();
-      });
-      if(avitoSelectedIdx==null) avitoSelectedIdx = defaultIdx;
-    }
-
-    var idx = (avitoSelectedIdx!=null) ? avitoSelectedIdx : avitoLastFullIdx(av);
-    if(idx<0){ hideLoader('avito-loader'); return; }
-
-    var monthLabel=av.months[idx];
-    var regLabel=document.getElementById('avito-regions-label');
-    if(regLabel) regLabel.textContent='\u0437\u0430 '+monthLabel.toLowerCase();
-
-    var budget   = avitoTotal(av,'budget',idx);
-    var spend    = avitoTotal(av,'spend', idx);
-    var ads      = avitoTotal(av,'ads',   idx);
-    var shows    = avitoTotal(av,'shows', idx);
-    var views    = avitoTotal(av,'views', idx);
-    var contacts = avitoTotal(av,'contacts', idx);
-    var pcontact = avitoTotal(av,'price_contact', idx);
-
-    // Бюджет — главное факт, если есть; иначе план
-    var budgetVal, budgetSub;
-    if(spend!=null && spend>0){
-      budgetVal = avitoFmtRub(spend);
-      budgetSub = (budget!=null && budget>0 ? '\u0438\u0437 '+avitoFmtRub(budget)+' \u043f\u043b\u0430\u043d\u0430' : '\u0444\u0430\u043a\u0442') + ' \u00b7 ' + (ads||0) + ' \u043e\u0431\u044a\u044f\u0432\u043b.';
-    } else {
-      budgetVal = avitoFmtRub(budget);
-      budgetSub = '\u043f\u043b\u0430\u043d \u00b7 '+(ads||0)+' \u043e\u0431\u044a\u044f\u0432\u043b.';
-    }
-
-    var ctrTotal = (shows && shows>0 && views!=null) ? +(views/shows*100).toFixed(2) : null;
-    var viewsSub = (ctrTotal!=null) ? ('CTR '+ctrTotal+'%') : '\u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u043e\u0432';
-
-    var kpis=[
-      { val: budgetVal, sub: budgetSub, label:'\u0411\u044e\u0434\u0436\u0435\u0442' },
-      { val: fmt.format(shows||0), sub:'\u043f\u043e\u043a\u0430\u0437\u043e\u0432', label:'\u041f\u043e\u043a\u0430\u0437\u044b' },
-      { val: fmt.format(views||0), sub:viewsSub, label:'\u041f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u044b' },
-      { val: fmt.format(contacts||0), sub:'\u0437\u0430\u043f\u0440\u043e\u0441\u043e\u0432', label:'\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u044b' },
-      { val: avitoFmtRub(pcontact), sub:'\u0437\u0430 \u043e\u0434\u0438\u043d \u043a\u043e\u043d\u0442\u0430\u043a\u0442', label:'\u0426\u0435\u043d\u0430 \u043a\u043e\u043d\u0442\u0430\u043a\u0442\u0430' },
-    ];
-    var html='';
-    kpis.forEach(function(k){
-      html+='<div class="kpi"><div class="k-lab">'+k.label+'</div>'+
-        '<div class="k-val">'+k.val+'</div><div class="k-sub">'+k.sub+'</div></div>';
-    });
-    document.getElementById('avito-kpis').innerHTML=html;
-
-    var labels=av.months.map(shortMonth);
-    var showsArr = (av.metrics.shows && av.metrics.shows.total) || [];
-    var viewsArr = (av.metrics.views && av.metrics.views.total) || [];
-    var contactsArr = (av.metrics.contacts && av.metrics.contacts.total) || [];
-
-    var ctrData = av.months.map(function(_, i){
-      var sh=showsArr[i], vw=viewsArr[i];
-      if(!sh || sh<=0 || vw==null) return null;
-      return +(vw/sh*100).toFixed(2);
-    });
-    var contactsData = av.months.map(function(_, i){
-      var ct=contactsArr[i];
-      return (ct==null||ct===0) ? null : ct;
-    });
-
-    if(avitoChart) avitoChart.destroy();
-    avitoChart=new Chart(document.getElementById('avitoChart'),{
-      data:{labels:labels, datasets:[
-        {type:'bar',label:'\u0417\u0430\u043f\u0440\u043e\u0441\u044b \u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043e\u0432',data:contactsData,backgroundColor:'#d97706cc',borderRadius:5,maxBarThickness:36,yAxisID:'y1',order:2},
-        {type:'line',label:'CTR (\u043f\u043e\u043a\u0430\u0437 \u2192 \u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440), %',data:ctrData,borderColor:'#6366f1',backgroundColor:'#6366f1',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1,spanGaps:true}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
-          tooltip:{callbacks:{label:function(c){
-            if(c.dataset.yAxisID==='y') return '  '+c.dataset.label+': '+(c.raw==null?'\u2014':c.raw+'%');
-            return '  '+c.dataset.label+': '+(c.raw==null?'\u2014':fmt.format(c.raw));
-          }}}},
-        scales:{
-          y:{position:'left',grid:{color:'#eef0f4'},border:{display:false},beginAtZero:true,title:{display:true,text:'CTR, %',color:'#6366f1',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},callback:function(v){return v+'%';}}},
-          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,title:{display:true,text:'\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u043e\u0432',color:'#d97706',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},precision:0}},
-          x:{grid:{display:false},border:{display:false},ticks:{color:'#8a91a0',font:{size:11}}}
-        }}
-    });
-    hideLoader('avito-loader');
-
-    // Таблица регионов: список ключей берём из shows.breakdown (самый полный)
-    var showsBd = (av.metrics.shows && av.metrics.shows.breakdown) || {};
-    var rows = Object.keys(showsBd).map(function(name){
-      var sh = avitoBd(av,'shows',name,idx);
-      var vw = avitoBd(av,'views',name,idx);
-      var ct = avitoBd(av,'contacts',name,idx);
-      var pr = avitoBd(av,'price_contact',name,idx);
-      var ctr = (sh && sh>0 && vw!=null) ? +(vw/sh*100).toFixed(2) : null;
-      return {name:name, shows:sh, views:vw, contacts:ct, price:pr, ctr:ctr};
-    }).filter(function(r){ return (r.shows && r.shows>0) || (r.contacts && r.contacts>0); });
-    rows.sort(function(a,b){return (b.shows||0)-(a.shows||0);});
-
-    var tb='';
-    if(!rows.length){
-      tb='<tr><td colspan="6" style="text-align:center;color:var(--ink-4);padding:22px 10px">\u043d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043c\u0435\u0441\u044f\u0446</td></tr>';
-    } else {
-      rows.forEach(function(r){
-        var model=avitoModel(r.name);
-        var dot = model==='S2' ? '#2f6bff' : (model==='T8' ? '#16a34a' : '#8a91a0');
-        var ctrCell='\u2014', ctrCls='';
-        if(r.ctr!=null){
-          ctrCls = r.ctr>=15 ? 'hot' : (r.ctr>=8 ? 'warm' : 'cold');
-          ctrCell = r.ctr+'%';
+      ]
+    },
+    "month": {
+      "funnel": [
+        {
+          "step": "Вход в бота",
+          "count": 306,
+          "conv": null,
+          "native": "Личка + Пришли с комментариев",
+          "children": [
+            {
+              "step": "Личка",
+              "count": 9,
+              "native": "Заинтересовались"
+            },
+            {
+              "step": "Комментарии",
+              "count": 233,
+              "native": "Пришли с комментариев"
+            }
+          ]
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 37,
+          "conv": 12,
+          "children": null,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 5,
+          "conv": 2,
+          "children": null,
+          "native": "Захотели связаться с менеджером"
         }
-        tb+='<tr>'+
-          '<td><span class="rname"><span class="rdot" style="background:'+dot+'"></span>'+r.name+'</span></td>'+
-          '<td class="rnum">'+(r.shows!=null?fmt.format(r.shows):'\u2014')+'</td>'+
-          '<td class="rnum">'+(r.views!=null?fmt.format(r.views):'\u2014')+'</td>'+
-          '<td class="rnum">'+(r.contacts!=null?fmt.format(r.contacts):'\u2014')+'</td>'+
-          '<td class="rnum">'+avitoFmtRub(r.price)+'</td>'+
-          '<td class="rpct '+ctrCls+'">'+ctrCell+'</td>'+
-          '</tr>';
-      });
-    }
-    document.getElementById('avito-regions').innerHTML=tb;
-  }
-
-  var trendChart=null;
-  function renderTrend(){
-    var ctx=document.getElementById('trendChart');
-    if(!ctx) return;
-    var pb=periodBlock();
-    var leadsTS = (pb && pb.leads && pb.leads.timeseries) ? pb.leads.timeseries : [];
-    var dealsTS = (pb && pb.deals && pb.deals.timeseries) ? pb.deals.timeseries : [];
-
-    var weeks={};
-    leadsTS.forEach(function(p){ weeks[p.week]=true; });
-    dealsTS.forEach(function(p){ weeks[p.week]=true; });
-    var labels=Object.keys(weeks).sort();
-
-    function bucket(arr){
-      var m={}; arr.forEach(function(p){m[p.week]=p.count;});
-      return labels.map(function(w){return m[w]||0;});
-    }
-    var leadsData=bucket(leadsTS);
-    var dealsData=bucket(dealsTS);
-
-    var months=['янв','фев','мар','апр','май','июн','июл','авг','сен','окт','ноя','дек'];
-    var pretty=labels.map(function(s){
-      var d=new Date(s); return d.getDate()+' '+months[d.getMonth()];
-    });
-
-    if(trendChart) trendChart.destroy();
-    if(!labels.length){
-      var c=ctx.getContext('2d'); c.clearRect(0,0,ctx.width,ctx.height);
-      c.font='13px Inter'; c.fillStyle='#8a91a0'; c.textAlign='center';
-      c.fillText('нет данных за выбранный период', ctx.width/2, ctx.height/2);
-      return;
-    }
-    trendChart=new Chart(ctx,{
-      data:{labels:pretty, datasets:[
-        {type:'line',label:'Лиды',data:leadsData,borderColor:'#0891b2',backgroundColor:'#0891b2',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,fill:false},
-        {type:'line',label:'Сделки',data:dealsData,borderColor:'#2f6bff',backgroundColor:'#2f6bff',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,fill:false}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
-          tooltip:{callbacks:{label:function(c){return '  '+c.dataset.label+': '+fmt.format(c.raw);}}}},
-        scales:{
-          y:{grid:{color:'#eef0f4'},border:{display:false},beginAtZero:true,ticks:{color:'#8a91a0',font:{size:11},precision:0}},
-          x:{grid:{display:false},border:{display:false},ticks:{color:'#8a91a0',font:{size:11},autoSkip:true,maxRotation:0}}
-        }}
-    });
-  }
-
-  function renderRoi(){
-    var host=document.getElementById('roi-tbody');
-    if(!host) return;
-    var pb=periodBlock();
-    var items = (pb && pb.leads && pb.leads.by_source) ? pb.leads.by_source.filter(function(s){return s.total>0;}) : [];
-    if(!items.length){
-      host.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--ink-4);padding:22px 10px">нет данных</td></tr>';
-      return;
-    }
-    if(roiSort==='conv'){
-      items.sort(function(a,b){
-        var sa=a.total<3?-1:a.conv_pct, sb=b.total<3?-1:b.conv_pct;
-        return sb-sa;
-      });
-    } else {
-      items.sort(function(a,b){ return b.total - a.total; });
-    }
-    var maxPct = Math.max.apply(null, items.map(function(s){return s.conv_pct||0;}).concat([1]));
-    var h='';
-    items.forEach(function(s){
-      var n=(s.name||'').toLowerCase(), col='#8a91a0';
-      if(n.indexOf('inst')>=0) col='#f5a623';
-      else if(n.indexOf('tele')>=0) col='#1d8fd1';
-      else if(n.indexOf('vk')>=0) col='#0077ff';
-      else if(n.indexOf('you')>=0) col='#ff0000';
-      else if(n.indexOf('сайт')>=0) col='#2f6bff';
-      else if(n.indexOf('авито')>=0) col='#16a34a';
-      else if(n.indexOf('реком')>=0) col='#7c3aed';
-      var pct=s.conv_pct||0;
-      var cls = s.total<3 ? 'muted' : (pct>=20?'hot':(pct>=10?'warm':'cold'));
-      var barW = maxPct ? Math.round(pct/maxPct*100) : 0;
-      var note = s.total<3 ? ' <span style="color:var(--ink-4);font-size:11px">мало данных</span>' : '';
-      h+='<tr>'+
-        '<td><span class="rname"><span class="rdot" style="background:'+col+'"></span>'+s.name+'</span></td>'+
-        '<td class="rnum">'+fmt.format(s.total)+'</td>'+
-        '<td class="rnum">'+fmt.format(s.converted||0)+'</td>'+
-        '<td class="rpct '+cls+'">'+pct+'%'+note+'</td>'+
-        '<td class="rbar"><div class="rbar-track"><div class="rbar-fill" style="width:'+barW+'%;background:'+col+'"></div></div></td>'+
-        '</tr>';
-    });
-    host.innerHTML=h;
-  }
-
-  function drawSrc(d){
-    var ctx=document.getElementById('srcChart');
-    if(srcChart) srcChart.destroy();
-
-    var items=[];
-    var pb=periodBlock();
-    if(pb && pb.leads && pb.leads.by_source){
-      items=pb.leads.by_source
-        .filter(function(s){return s.total>0;})
-        .map(function(s){return [s.name, s.total];});
-    }
-    var total=items.reduce(function(a,s){return a+s[1];},0);
-    var empty=!items.length;
-
-    var pal=['#2f6bff','#1d8fd1','#7c3aed','#0077ff','#16a34a','#d97706','#e1306c','#0891b2','#8a91a0'];
-    var cols=items.map(function(s,i){
-      var n=(s[0]||'').toLowerCase();
-      if(n.indexOf('inst')>=0) return '#f5a623';
-      if(n.indexOf('tele')>=0) return '#1d8fd1';
-      if(n.indexOf('vk')>=0) return '#0077ff';
-      if(n.indexOf('you')>=0) return '#ff0000';
-      if(n.indexOf('сайт')>=0) return '#2f6bff';
-      if(n.indexOf('авито')>=0) return '#16a34a';
-      return pal[i % pal.length];
-    });
-
-    srcChart=new Chart(ctx,{
-      type:'doughnut',
-      data:{labels:empty?['нет данных']:items.map(function(s){return s[0];}),
-        datasets:[{data:empty?[1]:items.map(function(s){return s[1];}),backgroundColor:empty?['#eef0f4']:cols,borderColor:'#fff',borderWidth:2}]},
-      options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
-        plugins:{legend:{display:!empty,position:'right',labels:{color:'#3a4150',font:{size:12.5},boxWidth:10,boxHeight:10,padding:9,usePointStyle:true,pointStyle:'rectRounded',
-          generateLabels:function(ch){var ds=ch.data.datasets[0];return ch.data.labels.map(function(l,i){
-            var pct=total?Math.round(ds.data[i]/total*100):0;
-            return{text:l+'  '+pct+'%',fillStyle:ds.backgroundColor[i],strokeStyle:ds.backgroundColor[i],lineWidth:0,index:i};});}}},
-          tooltip:{enabled:!empty,callbacks:{label:function(c){var pct=total?Math.round(c.raw/total*100):0;return '  '+c.label+': '+c.raw+' ('+pct+'%)';}}}}}
-    });
-  }
-
-  document.getElementById('periods').addEventListener('click',function(e){
-    var b=e.target.closest('button'); if(!b) return;
-    cur=b.dataset.p;
-    this.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
-    render(cur);
-  });
-
-  document.getElementById('pdf-btn').addEventListener('click', function(){
-    window.print();
-  });
-
-  var EVENTS_URLS = [
-    'https://script.google.com/macros/s/AKfycbxaZfTjfPfbQhyeS6P0GaGrDXGsO603VXpMoqpgVoRnDcq-u79vxp3gYQzDRJlkQ-5mRQ/exec',
-  ];
-  var EVENTS_DATA = [];
-
-  function moneyShort(v){
-    if(v >= 1000000) return (v/1000000).toFixed(v>=10000000?0:1).replace('.0','')+' млн ₽';
-    if(v >= 1000) return Math.round(v/1000)+' тыс ₽';
-    return fmt.format(v)+' ₽';
-  }
-  function cplClass(cpl){
-    if(cpl==null) return 'ecpl-na';
-    if(cpl < 100000) return 'ecpl-good';
-    if(cpl < 500000) return 'ecpl-mid';
-    return 'ecpl-bad';
-  }
-
-  function renderEvents(){
-    var ev = EVENTS_DATA;
-    if(!ev || ev.length === 0){
-      var cards = document.getElementById('events-cards');
-      if(cards) cards.innerHTML = '<div style="color:var(--ink-4);font-size:13px;padding:8px">загружаю данные мероприятий…</div>';
-      document.getElementById('events-summary').textContent = '';
-      document.getElementById('events-rows').innerHTML = '';
-      return;
-    }
-    var total = ev.reduce(function(s,e){return s+e.budget;},0);
-    var totalContacts = ev.reduce(function(s,e){return s + ((e.metrics && e.metrics.contacts) || 0);},0);
-    var totalQual = ev.reduce(function(s,e){return s + ((e.metrics && e.metrics.qual) || 0);},0);
-    var avg = ev.length ? Math.round(total / ev.length) : 0;
-    var cards = document.getElementById('events-cards');
-    cards.innerHTML =
-      '<div class="ecard"><div class="elab">Мероприятий</div><div class="eval">'+ev.length+'</div><div class="esub">за 2026 год</div></div>' +
-      '<div class="ecard"><div class="elab">Общий бюджет</div><div class="eval">'+moneyShort(total)+'</div><div class="esub">сумма по факту</div></div>' +
-      '<div class="ecard"><div class="elab">Контактов</div><div class="eval">'+(totalContacts||'—')+'</div><div class="esub">человек встретили</div></div>' +
-      '<div class="ecard"><div class="elab">Квал-лидов</div><div class="eval">'+(totalQual||'—')+'</div><div class="esub">могут купить</div></div>';
-
-    document.getElementById('events-summary').textContent = 'нажми на строку — раскроется детализация трат';
-
-    var rows = document.getElementById('events-rows');
-    rows.innerHTML = '';
-    ev.forEach(function(e){
-      var m = e.metrics || {};
-      var contacts = m.contacts;
-      var qual = m.qual;
-      var inWork = m.inWork;
-      var inKp = m.inKp;
-      var deals = m.deals;
-      var cpl = (qual && qual > 0) ? Math.round(e.budget / qual) : null;
-      var cpa = null;
-      var cpaIsProjected = false;
-      if (deals && deals > 0) {
-        cpa = Math.round(e.budget / deals);
-      } else if (inKp && inKp > 0) {
-        cpa = Math.round(e.budget / inKp);
-        cpaIsProjected = true;
-      }
-      var dateStr = e.dateStart === e.dateEnd ? e.dateStart : e.dateStart + ' — ' + e.dateEnd;
-
-      function num(v, fallback){
-        if(v == null || v === undefined) return fallback || '—';
-        return String(v);
-      }
-
-      var tr = document.createElement('tr');
-      tr.className = 'clickable';
-      tr.onclick = function(){ openEventDetail(e.id); };
-      tr.innerHTML =
-        '<td><div class="ename">'+e.name+'</div><div class="esub-row">'+e.notes+'</div></td>' +
-        '<td>'+dateStr+'</td>' +
-        '<td>'+e.city+'</td>' +
-        '<td class="emoney">'+moneyShort(e.budget)+'</td>' +
-        '<td class="enum">'+num(contacts)+'</td>' +
-        '<td class="enum">'+num(qual)+'</td>' +
-        '<td class="enum">'+num(inWork)+'</td>' +
-        '<td class="enum">'+num(inKp)+'</td>' +
-        '<td class="enum">'+num(deals, '0')+'</td>' +
-        '<td class="emoney '+cplClass(cpl)+'">'+(cpl==null?'—':moneyShort(cpl))+'</td>' +
-        '<td class="emoney '+cplClass(cpa)+'" title="'+(cpaIsProjected?'прогноз по лидам в КП/Договоре':'')+'">'+(cpa==null?'—':(cpaIsProjected?'~':'')+moneyShort(cpa))+'</td>';
-      rows.appendChild(tr);
-    });
-  }
-
-  function openEventDetail(id){
-    var e = EVENTS_DATA.find(function(x){return x.id===id;});
-    if(!e) return;
-    document.getElementById('events-detail').style.display = 'block';
-    document.getElementById('events-detail-title').textContent = 'Детализация трат — ' + e.name + ' (' + moneyShort(e.budget) + ')';
-    var rows = document.getElementById('events-detail-rows');
-    rows.innerHTML = '';
-    var cats = e.categories || [];
-    if(cats.length){
-      cats.forEach(function(c){
-        var pct = c.pct != null ? c.pct : (c.amount / e.budget * 100).toFixed(1);
-        var tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td>'+c.name+'</td>' +
-          '<td></td>' +
-          '<td class="dnum">'+fmt.format(c.amount)+' ₽</td>' +
-          '<td class="dpct">'+pct+'%</td>' +
-          '<td class="dcomment"></td>';
-        rows.appendChild(tr);
-      });
-    } else {
-      e.details.forEach(function(d){
-        var pct = (d.amount / e.budget * 100).toFixed(1);
-        var tr = document.createElement('tr');
-        tr.innerHTML =
-          '<td>'+d.article+'</td>' +
-          '<td>'+d.sub+'</td>' +
-          '<td class="dnum">'+fmt.format(d.amount)+' ₽</td>' +
-          '<td class="dpct">'+pct+'%</td>' +
-          '<td class="dcomment">'+(d.comment||'')+'</td>';
-        rows.appendChild(tr);
-      });
-    }
-    document.getElementById('events-detail').scrollIntoView({behavior:'smooth', block:'nearest'});
-  }
-  function closeEventDetail(){
-    document.getElementById('events-detail').style.display = 'none';
-  }
-
-  function loadEvents(){
-    if(!EVENTS_URLS || !EVENTS_URLS.length){
-      renderEvents();
-      return;
-    }
-    var loaded = 0;
-    var collected = [];
-    EVENTS_URLS.forEach(function(url, idx){
-      var cb = '__events_cb_' + idx + '_' + Date.now();
-      window[cb] = function(data){
-        try{
-          if(data && data.meta){
-            var meta = data.meta;
-            var totalBudget = (data.summary && data.summary.total) || 0;
-            var details = [];
-            (data.details || []).forEach(function(cat){
-              (cat.items || []).forEach(function(it){
-                details.push({
-                  article: cat.category,
-                  sub: it.description || it.article || '',
-                  amount: it.amount || 0,
-                  comment: it.date || ''
-                });
-              });
-            });
-            collected.push({
-              id: meta.id || ('event_' + idx),
-              name: meta.name || 'Мероприятие',
-              sub: meta.sub || '',
-              dateStart: meta.dateStart || '',
-              dateEnd: meta.dateEnd || '',
-              city: meta.city || '',
-              type: meta.type || '',
-              notes: meta.notes || '',
-              budget: totalBudget,
-              metrics: data.metrics || {},
-              leadsImmediate: meta.leadsImmediate == null ? null : meta.leadsImmediate,
-              leads3m: meta.leads3m == null ? null : meta.leads3m,
-              deals6m: meta.deals6m == null ? null : meta.deals6m,
-              content: meta.content,
-              details: details,
-              categories: (data.summary && data.summary.categories) || []
-            });
-          }
-        }catch(err){}
-        loaded++;
-        try{ delete window[cb]; }catch(e){}
-        if(loaded === EVENTS_URLS.length){
-          EVENTS_DATA = collected;
-          renderEvents();
+      ],
+      "snapshot": [
+        {
+          "step": "Личка",
+          "count": 9,
+          "native": "Заинтересовались"
+        },
+        {
+          "step": "Комментарии",
+          "count": 233,
+          "native": "Пришли с комментариев"
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 37,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 5,
+          "native": "Захотели связаться с менеджером"
         }
-      };
-      var s = document.createElement('script');
-      s.src = url + (url.indexOf('?')>=0 ? '&' : '?') + 'callback=' + cb;
-      s.onerror = function(){
-        loaded++;
-        if(loaded === EVENTS_URLS.length){
-          EVENTS_DATA = collected;
-          renderEvents();
+      ],
+      "side": [
+        {
+          "label": "Отказ",
+          "count": 4,
+          "native": "Отказ"
+        },
+        {
+          "label": "Случайные",
+          "count": 9,
+          "native": "Сотрудничество / Случайные срабатывания"
+        },
+        {
+          "label": "Игнор",
+          "count": 9,
+          "native": "Игнор"
         }
-      };
-      document.body.appendChild(s);
-    });
-  }
-
-  loadEvents();
-
-  document.getElementById('funnel-mode').addEventListener('click',function(e){
-    var b=e.target.closest('button'); if(!b) return;
-    curMode=b.dataset.m;
-    this.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
-    render(cur);
-  });
-
-  document.getElementById('roi-sort').addEventListener('click',function(e){
-    var b=e.target.closest('button'); if(!b) return;
-    roiSort=b.dataset.s;
-    this.querySelectorAll('button').forEach(x=>x.classList.toggle('active',x===b));
-    renderRoi();
-  });
-
-  var SMM_URL='https://script.google.com/macros/s/AKfycbywNGeF17oqQVX6hiPfwJ46_oeSFVNL3Ou7kOc9SqJPnAC7-tkypK4CksJ6a1XLpdM/exec';
-  var REACH_URL='https://script.google.com/macros/s/AKfycbzhUZRwqLEcU5w1WAKRCbCDobM0UNVojTZrUlhRL-zl9w0abL9BBQb1vimTe_fMWDqa/exec';
-  var smmChart=null, smmData=null, reachData=null, curChan=0;
-
-  function chanColor(name){
-    var n=(name||'').toLowerCase();
-    if(n.indexOf('inst')>=0) return '#f5a623';
-    if(n.indexOf('tele')>=0||n.indexOf('tg')>=0) return '#1d8fd1';
-    if(n.indexOf('vk')>=0) return '#0077ff';
-    if(n.indexOf('you')>=0||n.indexOf('yt')>=0) return '#ff0000';
-    return '#2f6bff';
-  }
-
-  function lastFilled(arr){
-    if(!arr || !arr.length) return {value:0, idx:-1};
-    for(var i=arr.length-1;i>=0;i--){
-      if(arr[i] && Number(arr[i].value)>0) return {value:Number(arr[i].value), idx:i};
+      ]
+    },
+    "quarter": {
+      "funnel": [
+        {
+          "step": "Вход в бота",
+          "count": 462,
+          "conv": null,
+          "native": "Личка + Пришли с комментариев",
+          "children": [
+            {
+              "step": "Личка",
+              "count": 76,
+              "native": "Заинтересовались"
+            },
+            {
+              "step": "Комментарии",
+              "count": 259,
+              "native": "Пришли с комментариев"
+            }
+          ]
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 59,
+          "conv": 13,
+          "children": null,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 8,
+          "conv": 2,
+          "children": null,
+          "native": "Захотели связаться с менеджером"
+        }
+      ],
+      "snapshot": [
+        {
+          "step": "Личка",
+          "count": 76,
+          "native": "Заинтересовались"
+        },
+        {
+          "step": "Комментарии",
+          "count": 259,
+          "native": "Пришли с комментариев"
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 59,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 8,
+          "native": "Захотели связаться с менеджером"
+        }
+      ],
+      "side": [
+        {
+          "label": "Отказ",
+          "count": 26,
+          "native": "Отказ"
+        },
+        {
+          "label": "Случайные",
+          "count": 22,
+          "native": "Сотрудничество / Случайные срабатывания"
+        },
+        {
+          "label": "Игнор",
+          "count": 12,
+          "native": "Игнор"
+        }
+      ]
+    },
+    "year": {
+      "funnel": [
+        {
+          "step": "Вход в бота",
+          "count": 462,
+          "conv": null,
+          "native": "Личка + Пришли с комментариев",
+          "children": [
+            {
+              "step": "Личка",
+              "count": 76,
+              "native": "Заинтересовались"
+            },
+            {
+              "step": "Комментарии",
+              "count": 259,
+              "native": "Пришли с комментариев"
+            }
+          ]
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 59,
+          "conv": 13,
+          "children": null,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 8,
+          "conv": 2,
+          "children": null,
+          "native": "Захотели связаться с менеджером"
+        }
+      ],
+      "snapshot": [
+        {
+          "step": "Личка",
+          "count": 76,
+          "native": "Заинтересовались"
+        },
+        {
+          "step": "Комментарии",
+          "count": 259,
+          "native": "Пришли с комментариев"
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 59,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 8,
+          "native": "Захотели связаться с менеджером"
+        }
+      ],
+      "side": [
+        {
+          "label": "Отказ",
+          "count": 26,
+          "native": "Отказ"
+        },
+        {
+          "label": "Случайные",
+          "count": 22,
+          "native": "Сотрудничество / Случайные срабатывания"
+        },
+        {
+          "label": "Игнор",
+          "count": 12,
+          "native": "Игнор"
+        }
+      ]
+    },
+    "all": {
+      "funnel": [
+        {
+          "step": "Вход в бота",
+          "count": 462,
+          "conv": null,
+          "native": "Личка + Пришли с комментариев",
+          "children": [
+            {
+              "step": "Личка",
+              "count": 76,
+              "native": "Заинтересовались"
+            },
+            {
+              "step": "Комментарии",
+              "count": 259,
+              "native": "Пришли с комментариев"
+            }
+          ]
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 59,
+          "conv": 13,
+          "children": null,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 8,
+          "conv": 2,
+          "children": null,
+          "native": "Захотели связаться с менеджером"
+        }
+      ],
+      "snapshot": [
+        {
+          "step": "Личка",
+          "count": 76,
+          "native": "Заинтересовались"
+        },
+        {
+          "step": "Комментарии",
+          "count": 259,
+          "native": "Пришли с комментариев"
+        },
+        {
+          "step": "Узнал цену / нет ответа",
+          "count": 59,
+          "native": "Узнал цену / нет ответа"
+        },
+        {
+          "step": "Захотели к менеджеру",
+          "count": 8,
+          "native": "Захотели связаться с менеджером"
+        }
+      ],
+      "side": [
+        {
+          "label": "Отказ",
+          "count": 26,
+          "native": "Отказ"
+        },
+        {
+          "label": "Случайные",
+          "count": 22,
+          "native": "Сотрудничество / Случайные срабатывания"
+        },
+        {
+          "label": "Игнор",
+          "count": 12,
+          "native": "Игнор"
+        }
+      ]
     }
-    return {value:0, idx:-1};
-  }
-
-  function shortMonth(m){
-    if(!m) return m;
-    var parts=String(m).trim().split(/\s+/);
-    var name=parts[0]||'';
-    var year=parts[1]||'';
-    var map={'январь':'Янв','февраль':'Фев','март':'Мар','апрель':'Апр','май':'Май','июнь':'Июн','июль':'Июл','август':'Авг','сентябрь':'Сен','октябрь':'Окт','ноябрь':'Ноя','декабрь':'Дек'};
-    var short=map[name.toLowerCase()]||name.slice(0,3);
-    var yy=year.length>=2?"'"+year.slice(-2):'';
-    return short+' '+yy;
-  }
-
-  function loadSmm(){
-    var cb='__smm_cb_'+Date.now();
-    window[cb]=function(data){
-      smmData=data;
-      renderSmm();
-      try{ delete window[cb]; }catch(e){}
-    };
-    var s=document.createElement('script');
-    s.src=SMM_URL+'?callback='+cb;
-    s.onerror=function(){
-      var host=document.getElementById('social');
-      if(host) host.innerHTML='<div style="color:var(--ink-4);font-size:13px">Не удалось загрузить данные соцсетей</div>';
-    };
-    document.body.appendChild(s);
-  }
-
-  function loadReach(){
-    var cb='__reach_cb_'+Date.now();
-    window[cb]=function(data){
-      reachData=data;
-      if(typeof renderChLeads==='function') renderChLeads();
-      if(typeof renderAvito==='function') renderAvito();
-      try{ delete window[cb]; }catch(e){}
-    };
-    var s=document.createElement('script');
-    s.src=REACH_URL+'?callback='+cb;
-    s.onerror=function(){};
-    document.body.appendChild(s);
-  }
-
-  function renderSmm(){
-    if(!smmData || !smmData.smm || !smmData.smm.length) return;
-    var channels=smmData.smm;
-
-    var sw=document.getElementById('chan-switch');
-    sw.innerHTML='';
-    channels.forEach(function(ch,i){
-      var b=document.createElement('button');
-      b.textContent=ch.name;
-      if(i===curChan) b.className='active';
-      b.onclick=function(){ curChan=i; renderSmm(); };
-      sw.appendChild(b);
-    });
-
-    var sc='';
-    channels.forEach(function(ch){
-      var subs=ch.subscribers||[];
-      var grow=ch.growth||[];
-      var lf=lastFilled(subs);
-      var last=lf.value;
-      var lastGrow = (lf.idx>=0 && grow[lf.idx]) ? Number(grow[lf.idx].value) : 0;
-      var col=chanColor(ch.name);
-      var growTxt=lastGrow>0?('+'+fmt.format(lastGrow)):(lastGrow<0?fmt.format(lastGrow):'—');
-      var growCls=lastGrow>0?'k-up':(lastGrow<0?'k-down':'');
-      sc+='<div class="scard" style="border-top:3px solid '+col+'">'+
-        '<div class="sname" style="margin-bottom:6px">'+ch.name+'</div>'+
-        '<div class="sreach">'+fmt.format(last)+'</div>'+
-        '<div class="smeta">подписчиков</div>'+
-        '<div class="sgrow '+growCls+'" style="'+(lastGrow>0?'':'color:var(--ink-4)')+'">'+growTxt+' за посл. месяц</div></div>';
-    });
-    document.getElementById('social').innerHTML=sc;
-    if(typeof refreshKpiAfterSmm==='function') refreshKpiAfterSmm();
-
-    var ch=channels[curChan];
-    var subsArr=ch.subscribers||[];
-    var growArr=ch.growth||[];
-    var lf=lastFilled(subsArr);
-    var cut=lf.idx>=0?lf.idx+1:subsArr.length;
-    var labels=subsArr.slice(0,cut).map(function(x){return shortMonth(x.month);});
-    var subsData=subsArr.slice(0,cut).map(function(x){return x.value;});
-    var growData=growArr.slice(0,cut).map(function(x){return x.value;});
-    var col=chanColor(ch.name);
-    var ctx=document.getElementById('smmChart');
-    if(smmChart) smmChart.destroy();
-    smmChart=new Chart(ctx,{
-      data:{labels:labels,datasets:[
-        {type:'bar',label:'Прирост',data:growData,backgroundColor:col+'44',borderRadius:5,maxBarThickness:40,order:2},
-        {type:'line',label:'Подписчики',data:subsData,borderColor:col,backgroundColor:col,borderWidth:2.5,tension:.35,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,order:1}
-      ]},
-      options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
-        plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
-          tooltip:{callbacks:{label:function(c){return '  '+c.dataset.label+': '+fmt.format(c.raw);}}}},
-        scales:{
-          y:{grid:{color:'#eef0f4'},border:{display:false},beginAtZero:true,ticks:{color:'#8a91a0',font:{size:11},callback:function(v){return fmt.format(v);}}},
-          x:{grid:{display:false},border:{display:false},ticks:{color:'#8a91a0',font:{size:11}}}
-        }}
-    });
-  }
-
-  loadSmm();
-  loadReach();
-
-  function hideLoader(id){ var el=document.getElementById(id); if(el) el.classList.add('hide'); }
-
-  function refreshKpiAfterSmm(){
-    if(typeof render==='function') render(cur);
-    hideLoader('smm-loader');
-    if(LIVE) hideLoader('chleads-loader');
-  }
-
-  fetch('funnel.json', {cache:'no-store'})
-    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-    .then(function(j){
-      LIVE=j;
-      var tag=document.querySelector('.demo-tag');
-      if(tag){
-        tag.textContent='данные из Битрикс';
-        tag.style.color='var(--green)';
-        tag.style.background='var(--green-soft)';
-      }
-      if(j.updated){
-        var sub=document.querySelector('.head p');
-        if(sub) sub.textContent='Воронка из Битрикс · обновлено '+new Date(j.updated).toLocaleString('ru-RU',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'});
-      }
-      var sel=document.getElementById('source-filter');
-      if(sel && j.periods && j.periods.all){
-        var totalsByName={};
-        var allBlk=j.periods.all;
-        ((allBlk.deals&&allBlk.deals.by_source)||[]).forEach(function(s){ totalsByName[s.name]=(totalsByName[s.name]||0)+s.total; });
-        ((allBlk.leads&&allBlk.leads.by_source)||[]).forEach(function(s){ totalsByName[s.name]=(totalsByName[s.name]||0)+s.total; });
-        var names=Object.keys(totalsByName).sort(function(a,b){return totalsByName[b]-totalsByName[a];});
-        names.forEach(function(name){
-          var o=document.createElement('option');
-          o.value=name; o.textContent=name;
-          sel.appendChild(o);
-        });
-        sel.addEventListener('change',function(){
-          curSource=this.value;
-          render(cur);
-        });
-      }
-      render(cur);
-      hideLoader('trend-loader');
-      hideLoader('src-loader');
-      if(smmData) hideLoader('chleads-loader');
-    })
-    .catch(function(){
-      render(cur);
-      hideLoader('trend-loader');
-      hideLoader('src-loader');
-      hideLoader('chleads-loader');
-    });
-
-  var BOT_COLORS=['#2f6bff','#0891b2','#16a34a','#7c3aed'];
-  var ENTRY_COLORS={'Личка':'#2f6bff','Комментарии':'#7c3aed'};
-  var botExpanded=false;
-
-  function renderBot(){
-    var host=document.getElementById('bot-funnel');
-    var botBlk = null;
-    if(BOT){
-      if(BOT.periods){
-        botBlk = BOT.periods[cur] || BOT.periods['all'] || null;
-      } else if(BOT.funnel){
-        botBlk = BOT;
-      }
-    }
-    var data = botBlk ? botBlk.funnel : null;
-    if(!data || !data.length){
-      host.innerHTML='<div style="text-align:center;color:var(--ink-4);padding:20px 0">нет данных</div>';
-      document.getElementById('bot-side').innerHTML='';
-      return;
-    }
-    var gmax = Math.max.apply(null, data.map(function(x){return x.count;}).concat([1]));
-    var h='';
-    for(var i=0;i<data.length;i++){
-      var st=data[i], v=st.count;
-      var pct = v>0 ? Math.max(Math.round(v/gmax*100),4) : 0;
-      var col=BOT_COLORS[i % BOT_COLORS.length];
-      var hasKids = st.children && st.children.length;
-      var pctLabel = (st.conv!=null) ? '<span class="fpct">'+st.conv+'% от входа</span>' : '';
-      var expandLabel = hasKids ? '<span class="fexpand">'+(botExpanded?'▾ свернуть':'▸ из чего')+'</span>' : '';
-      var nat = st.native ? ' title="В SaleBot: '+String(st.native).replace(/"/g,'&quot;')+'"' : '';
-      h+='<div class="fstep'+(hasKids?' link':'')+'"'+(hasKids?' data-bot-toggle="1"':'')+nat+'>'+
-        '<div class="bar" style="background:'+col+';width:'+pct+'%"></div>'+
-        '<div class="fc"><span class="fl"><span class="fdot" style="background:'+col+'"></span>'+st.step+
-        pctLabel+expandLabel+'</span>'+
-        '<span class="fv">'+fmt.format(v)+'</span></div></div>';
-      if(hasKids && botExpanded){
-        st.children.forEach(function(ch){
-          var cc=ENTRY_COLORS[ch.step]||'#8a91a0';
-          var cnat = ch.native ? ' title="В SaleBot: '+String(ch.native).replace(/"/g,'&quot;')+'"' : '';
-          h+='<div class="fchild"'+cnat+'><span class="fl"><span class="fdot" style="background:'+cc+'"></span>'+ch.step+'</span>'+
-             '<span class="fv">'+fmt.format(ch.count)+'</span></div>';
-        });
-      }
-    }
-    host.innerHTML=h;
-
-    var toggle=host.querySelector('[data-bot-toggle]');
-    if(toggle) toggle.addEventListener('click',function(){ botExpanded=!botExpanded; renderBot(); });
-
-    var sc='';
-    if(botBlk && botBlk.side){
-      botBlk.side.forEach(function(s){
-        var lose = /отказ|случайн/i.test(s.label);
-        var snat = s.native ? ' title="В SaleBot: '+String(s.native).replace(/"/g,'&quot;')+'"' : '';
-        sc+='<div class="scount'+(lose?' lose':'')+'"'+snat+'><div class="sc-v">'+fmt.format(s.count)+'</div><div class="sc-l">'+s.label+'</div></div>';
-      });
-    }
-    document.getElementById('bot-side').innerHTML=sc;
-  }
-
-  var BOT=null;
-  fetch('salebot.json', {cache:'no-store'})
-    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
-    .then(function(j){ BOT=j; renderBot(); })
-    .catch(function(){ renderBot(); });
-</script>
-</body>
-</html>
+  },
+  "ghosts": 1502
+}
