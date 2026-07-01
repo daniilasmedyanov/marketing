@@ -130,7 +130,7 @@
   .funnel-col-title{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:baseline;gap:8px}
   .funnel-col-title span{font-size:11px;font-weight:500;color:var(--ink-4)}
   .side-counters{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
-  .through-conv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;background:var(--bg);border-radius:10px;margin-bottom:14px}
+  .through-conv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;background:var(--bg);border-radius:10px;margin-top:14px}
   .through-conv .tc-item{display:flex;flex-direction:column;gap:4px;padding:6px 10px}
   .through-conv .tc-lab{font-size:10.5px;color:var(--ink-3);font-weight:600;letter-spacing:.02em;line-height:1.25}
   .through-conv .tc-val{font-size:18px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
@@ -598,7 +598,7 @@
         if(dealArr.length) html+='<div class="funnel-group-label">Потенциальные клиенты</div>'+rowsHtml(dealArr, FUNNEL_COLORS);
         if(!leadArr.length && !dealArr.length) html='<div style="text-align:center;color:var(--ink-4);padding:24px 0">нет данных по этому источнику</div>';
 
-        // Сквозные конверсии
+        // Сквозные конверсии — под воронкой
         if(whichMetric==='funnel' && leadArr.length && dealArr.length){
           var connEstablished = leadArr[0].count;
           var leadsInFunnel = dealArr[0].count;
@@ -608,12 +608,11 @@
           var e2l = pct(leadsInFunnel, connEstablished);
           var l2w = pct(won, leadsInFunnel);
           var e2w = pct(won, connEstablished);
-          var convHtml = '<div class="through-conv">'+
+          html += '<div class="through-conv">'+
             '<div class="tc-item"><span class="tc-lab">Связь установлена → Лиды</span><span class="tc-val">'+pctFmt(e2l)+'</span></div>'+
             '<div class="tc-item"><span class="tc-lab">Лиды → Выиграна</span><span class="tc-val">'+pctFmt(l2w)+'</span></div>'+
             '<div class="tc-item"><span class="tc-lab">Связь установлена → Выиграна</span><span class="tc-val">'+pctFmt(e2w)+'</span></div>'+
             '</div>';
-          html = convHtml + html;
         }
       } else {
         var f=d.funnel, max=Math.max.apply(null,f.concat([1]));
