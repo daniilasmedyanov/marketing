@@ -650,6 +650,21 @@
     }
     document.getElementById('side-counters').innerHTML=sc;
 
+    // Выравниваем группу «Потенциальные клиенты» справа с одноимённой подписью слева
+    setTimeout(function(){
+      var leftFunnel = document.getElementById('funnel-single');
+      var rightSide = document.getElementById('side-counters');
+      if(!leftFunnel || !rightSide) return;
+      var leftLabels = leftFunnel.querySelectorAll('.funnel-group-label');
+      var rightLabels = rightSide.querySelectorAll('.side-group-label');
+      if(leftLabels.length < 2 || rightLabels.length < 2) return;
+      var leftPCTop = leftLabels[1].offsetTop;
+      var rightPCLabel = rightLabels[1];
+      var rightPCTopCurrent = rightPCLabel.offsetTop;
+      var diff = leftPCTop - rightPCTopCurrent;
+      if(diff > 0) rightPCLabel.style.marginTop = (14 + diff) + 'px';
+    }, 0);
+
     drawSrc(d);
     renderRoi();
     renderTrend();
