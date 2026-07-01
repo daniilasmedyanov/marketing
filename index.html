@@ -130,6 +130,14 @@
   .funnel-col-title{font-size:13px;font-weight:700;margin-bottom:12px;display:flex;align-items:baseline;gap:8px}
   .funnel-col-title span{font-size:11px;font-weight:500;color:var(--ink-4)}
   .side-counters{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+  .through-conv{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;padding:12px;background:var(--bg);border-radius:10px;margin-bottom:14px}
+  .through-conv .tc-item{display:flex;flex-direction:column;gap:4px;padding:6px 10px}
+  .through-conv .tc-lab{font-size:10.5px;color:var(--ink-3);font-weight:600;letter-spacing:.02em;line-height:1.25}
+  .through-conv .tc-val{font-size:18px;font-weight:700;letter-spacing:-.02em;color:var(--ink)}
+  @media(max-width:720px){.through-conv{grid-template-columns:1fr}}
+  .side-group-label{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-4);margin:4px 0 2px 2px}
+  .side-group-label:first-child{margin-top:0}
+  .side-right .side-group-label + .side-group-label{margin-top:14px}
   .funnel-layout{display:grid;grid-template-columns:minmax(0,640px) 1fr;gap:22px;align-items:start}
   .funnel-layout .funnel{margin:0}
   .side-right{margin-top:0;flex-direction:column;flex-wrap:nowrap}
@@ -341,7 +349,7 @@
     <!-- 5. Окупаемость каналов — какой канал реально окупается -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
-        <h2>Окупаемость каналов</h2>
+        <h2>Конверсия каналов</h2>
         <div class="chan-switch" id="roi-sort">
           <button data-s="conv">По конверсии</button>
           <button data-s="total" class="active">По заявкам</button>
@@ -548,10 +556,10 @@
     var reachTxt = reachTotal>0 ? fmt.format(reachTotal) : '0';
     var reachSub = reachTotal>0 ? ('<span class="'+(reachGrow>0?'k-up':'muted')+'">'+(reachGrow>0?('+'+fmt.format(reachGrow)+' за месяц'):'подписчиков')+'</span>') : '<span class="muted">нет данных</span>';
     document.getElementById('kpis').innerHTML=
-      kpiCard('\u0421\u0434\u0435\u043b\u043a\u0438',dealsVal,'<span class="muted">\u0432\u043e\u0448\u043b\u043e \u0432 \u0432\u043e\u0440\u043e\u043d\u043a\u0443</span>','','<path d="M20 6 9 17l-5-5"/>',
-        'var(--blue)','var(--blue-soft)')+
       kpiCard('\u041b\u0438\u0434\u044b',leadsVal,'<span class="muted">\u0432\u0441\u0435\u0433\u043e \u043b\u0438\u0434\u043e\u0432</span>','','<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>',
         'var(--purple)','var(--purple-soft)')+
+      kpiCard('\u041f\u043e\u0442\u0435\u043d\u0446\u0438\u0430\u043b\u044c\u043d\u044b\u0435 \u043a\u043b\u0438\u0435\u043d\u0442\u044b',dealsVal,'<span class="muted">\u0432\u043e\u0448\u043b\u043e \u0432 \u0432\u043e\u0440\u043e\u043d\u043a\u0443</span>','','<path d="M20 6 9 17l-5-5"/>',
+        'var(--blue)','var(--blue-soft)')+
       kpiCard('\u041f\u043e\u0434\u043f\u0438\u0441\u0447\u0438\u043a\u0438',reachTxt,reachSub,'','<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>','var(--blue)','var(--blue-soft)');
 
     // СКВОЗНАЯ воронка: лиды -> сделки. Строим обе колонки (воронка + слепок).
@@ -587,8 +595,26 @@
           return h;
         }
         if(leadArr.length) html+='<div class="funnel-group-label">Лиды</div>'+rowsHtml(leadArr, LEAD_COLORS);
-        if(dealArr.length) html+='<div class="funnel-group-label">Сделки</div>'+rowsHtml(dealArr, FUNNEL_COLORS);
+        if(dealArr.length) html+='<div class="funnel-group-label">Потенциальные клиенты</div>'+rowsHtml(dealArr, FUNNEL_COLORS);
         if(!leadArr.length && !dealArr.length) html='<div style="text-align:center;color:var(--ink-4);padding:24px 0">нет данных по этому источнику</div>';
+
+        // Сквозные конверсии
+        if(whichMetric==='funnel' && leadArr.length && dealArr.length){
+          var connEstablished = leadArr[0].count;
+          var leadsInFunnel = dealArr[0].count;
+          var won = dealArr[dealArr.length-1].count;
+          function pct(a,b){ return b>0 ? Math.round(a/b*100) : null; }
+          function pctFmt(v){ return v==null ? '—' : v+'%'; }
+          var e2l = pct(leadsInFunnel, connEstablished);
+          var l2w = pct(won, leadsInFunnel);
+          var e2w = pct(won, connEstablished);
+          var convHtml = '<div class="through-conv">'+
+            '<div class="tc-item"><span class="tc-lab">Связь установлена → Лиды</span><span class="tc-val">'+pctFmt(e2l)+'</span></div>'+
+            '<div class="tc-item"><span class="tc-lab">Лиды → Выиграна</span><span class="tc-val">'+pctFmt(l2w)+'</span></div>'+
+            '<div class="tc-item"><span class="tc-lab">Связь установлена → Выиграна</span><span class="tc-val">'+pctFmt(e2w)+'</span></div>'+
+            '</div>';
+          html = convHtml + html;
+        }
       } else {
         var f=d.funnel, max=Math.max.apply(null,f.concat([1]));
         for(var i=0;i<f.length;i++){
@@ -604,19 +630,23 @@
 
     document.getElementById('funnel-single').innerHTML = buildChain(curMode);
 
-    // Боковые счётчики: лиды + сделки (сделки — из выбранного источника)
+    // Боковые счётчики: сначала плашки лидов, потом плашки потенциальных клиентов
     var sc='';
     if(LIVE){
       var dd2=dealsData();
-      var sideAll = [];
       var ld3=leadsData();
-      if(ld3 && ld3.side) sideAll = sideAll.concat(ld3.side);
-      if(dd2 && dd2.side) sideAll = sideAll.concat(dd2.side);
-      sideAll.forEach(function(s){
-        var lose = /провал|некач/i.test(s.label);
-        var nat = s.native ? ' title="В Битриксе: '+s.native.replace(/"/g,'&quot;')+'"' : '';
-        sc+='<div class="scount'+(lose?' lose':'')+'"'+nat+'><div class="sc-v">'+fmt.format(s.count)+'</div><div class="sc-l">'+s.label+'</div></div>';
-      });
+      function renderSideGroup(label, arr){
+        if(!arr || !arr.length) return '';
+        var html='<div class="side-group-label">'+label+'</div>';
+        arr.forEach(function(s){
+          var lose = /провал|некач/i.test(s.label);
+          var nat = s.native ? ' title="В Битриксе: '+s.native.replace(/"/g,'&quot;')+'"' : '';
+          html+='<div class="scount'+(lose?' lose':'')+'"'+nat+'><div class="sc-v">'+fmt.format(s.count)+'</div><div class="sc-l">'+s.label+'</div></div>';
+        });
+        return html;
+      }
+      sc += renderSideGroup('Лиды', ld3 && ld3.side ? ld3.side : []);
+      sc += renderSideGroup('Потенциальные клиенты', dd2 && dd2.side ? dd2.side : []);
     }
     document.getElementById('side-counters').innerHTML=sc;
 
