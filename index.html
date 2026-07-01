@@ -395,7 +395,7 @@
           <th style="text-align:right">Просмотры</th>
           <th style="text-align:right">Контакты</th>
           <th style="text-align:right">Цена контакта</th>
-          <th style="text-align:right">Конверсия</th>
+          <th style="text-align:right">CTR</th>
         </tr></thead>
         <tbody id="avito-regions"></tbody>
       </table>
@@ -717,55 +717,81 @@
     });
   }
 
-  // ===== АВИТО: сводка + регионы =====
+  // ===== АВИТО: новый формат данных =====
+  // av.months: ["Май 2025", ...]
+  // av.metrics.{ads,budget,spend,shows,views,contacts,price_view,price_contact}
+  //   .total: [...]
+  //   .breakdown: {"S2 Москва":[...], "Т8 Грозный":[...], ...}  (есть не у всех)
+  //   .byCity: {"Москва":[...], ...}  (только для не-средних)
   var avitoChart=null;
-  var avitoSelectedIdx=null;  // null = последний заполненный
+  var avitoSelectedIdx=null;
 
-  // ищем последний месяц где есть осмысленные данные (показы или контакты)
-  function avitoLastMonthIdx(total){
-    for(var i=total.months.length-1;i>=0;i--){
-      var sh=total.shows[i], ct=total.contacts[i];
-      if((sh!=null && sh>0) || (ct!=null && ct>0)) return i;
-    }
+  function avitoTotal(av, key, idx){
+    var m=av.metrics && av.metrics[key];
+    if(!m || !m.total) return null;
+    var v=m.total[idx];
+    return (v==null) ? null : v;
+  }
+  function avitoBd(av, key, name, idx){
+    var m=av.metrics && av.metrics[key];
+    if(!m || !m.breakdown || !m.breakdown[name]) return null;
+    var v=m.breakdown[name][idx];
+    return (v==null) ? null : v;
+  }
+  function avitoMonthHasData(av, i){
+    var sh=avitoTotal(av,'shows',i), ct=avitoTotal(av,'contacts',i);
+    return (sh!=null && sh>0) || (ct!=null && ct>0);
+  }
+  function avitoLastMonthIdx(av){
+    for(var i=av.months.length-1;i>=0;i--) if(avitoMonthHasData(av,i)) return i;
     return -1;
   }
-  // "полный" месяц — есть и бюджет и показы
-  function avitoLastFullIdx(total){
-    for(var i=total.months.length-1;i>=0;i--){
-      var sh=total.shows[i], bg=total.budget[i];
-      if(sh!=null && sh>0 && bg!=null && bg>0) return i;
+  function avitoLastFullIdx(av){
+    var now = new Date();
+    var curY = now.getFullYear(), curM = now.getMonth() + 1, curD = now.getDate();
+    var ruM = {'январь':1,'февраль':2,'март':3,'апрель':4,'май':5,'июнь':6,
+               'июль':7,'август':8,'сентябрь':9,'октябрь':10,'ноябрь':11,'декабрь':12};
+    // если сегодня 20-е или позже — текущий месяц тоже считаем "полным"
+    var includeCurrent = curD >= 20;
+    for(var i=av.months.length-1;i>=0;i--){
+      if(!avitoMonthHasData(av,i)) continue;
+      var p = String(av.months[i]).trim().split(/\s+/);
+      var m = ruM[(p[0]||'').toLowerCase()] || 0;
+      var y = parseInt(p[1]||'0', 10);
+      if(y < curY || (y === curY && m < curM)) return i;
+      if(includeCurrent && y === curY && m === curM) return i;
     }
-    return avitoLastMonthIdx(total);
+    return avitoLastMonthIdx(av);
   }
   function avitoFmtRub(v){
-    if(v==null||v===0) return '—';
-    if(v>=1000000) return (Math.round(v/100000)/10).toLocaleString('ru-RU')+' млн ₽';
-    if(v>=1000) return Math.round(v/1000)+'к ₽';
-    return Math.round(v)+' ₽';
+    if(v==null||v===0) return '\u2014';
+    if(v>=1000000) return (Math.round(v/100000)/10).toLocaleString('ru-RU')+' \u043c\u043b\u043d \u20bd';
+    if(v>=1000) return Math.round(v/1000)+'\u043a \u20bd';
+    return Math.round(v)+' \u20bd';
+  }
+  // "S2 Москва" -> модель S2 (цвет), "Т8 Грозный" -> модель T8
+  function avitoModel(name){
+    var n=String(name||'').toLowerCase();
+    if(/^s2\b|^ѕ2\b/i.test(name)) return 'S2';
+    if(/^t8\b|^т8\b/i.test(name)) return 'T8';
+    return '';
   }
 
   function renderAvito(){
-    if(!reachData || !reachData.avito){
-      hideLoader('avito-loader');
-      return;
-    }
+    if(!reachData || !reachData.avito){ hideLoader('avito-loader'); return; }
     var av=reachData.avito;
-    var total=av.total;
+    if(!av.months || !av.metrics){ hideLoader('avito-loader'); return; }
 
-    // заполняем дропдаун месяцев (только заполненные — где есть показы ИЛИ контакты)
     var sel=document.getElementById('avito-month');
     if(sel && !sel.dataset.filled){
-      var defaultIdx = avitoLastFullIdx(total);
-      // собираем индексы месяцев с данными
+      var defaultIdx = avitoLastFullIdx(av);
       var indices=[];
-      for(var k=0;k<total.months.length;k++){
-        var sh=total.shows[k], ct=total.contacts[k];
-        if((sh!=null && sh>0) || (ct!=null && ct>0)) indices.push(k);
+      for(var k=0;k<av.months.length;k++){
+        if(avitoMonthHasData(av,k)) indices.push(k);
       }
-      // от нового к старому в выпадающем
       indices.reverse();
       sel.innerHTML = indices.map(function(i){
-        var s = total.months[i] + (i===defaultIdx?' · последний полный':'');
+        var s = av.months[i] + (i===defaultIdx?' \u00b7 \u043f\u043e\u0441\u043b\u0435\u0434\u043d\u0438\u0439 \u043f\u043e\u043b\u043d\u044b\u0439':'');
         return '<option value="'+i+'"'+(i===defaultIdx?' selected':'')+'>'+s+'</option>';
       }).join('');
       sel.dataset.filled='1';
@@ -776,20 +802,40 @@
       if(avitoSelectedIdx==null) avitoSelectedIdx = defaultIdx;
     }
 
-    var idx = (avitoSelectedIdx!=null) ? avitoSelectedIdx : avitoLastFullIdx(total);
+    var idx = (avitoSelectedIdx!=null) ? avitoSelectedIdx : avitoLastFullIdx(av);
     if(idx<0){ hideLoader('avito-loader'); return; }
 
-    var monthLabel=total.months[idx];
+    var monthLabel=av.months[idx];
     var regLabel=document.getElementById('avito-regions-label');
-    if(regLabel) regLabel.textContent='за '+monthLabel.toLowerCase();
+    if(regLabel) regLabel.textContent='\u0437\u0430 '+monthLabel.toLowerCase();
 
-    // KPI карточки
+    var budget   = avitoTotal(av,'budget',idx);
+    var spend    = avitoTotal(av,'spend', idx);
+    var ads      = avitoTotal(av,'ads',   idx);
+    var shows    = avitoTotal(av,'shows', idx);
+    var views    = avitoTotal(av,'views', idx);
+    var contacts = avitoTotal(av,'contacts', idx);
+    var pcontact = avitoTotal(av,'price_contact', idx);
+
+    // Бюджет — главное факт, если есть; иначе план
+    var budgetVal, budgetSub;
+    if(spend!=null && spend>0){
+      budgetVal = avitoFmtRub(spend);
+      budgetSub = (budget!=null && budget>0 ? '\u0438\u0437 '+avitoFmtRub(budget)+' \u043f\u043b\u0430\u043d\u0430' : '\u0444\u0430\u043a\u0442') + ' \u00b7 ' + (ads||0) + ' \u043e\u0431\u044a\u044f\u0432\u043b.';
+    } else {
+      budgetVal = avitoFmtRub(budget);
+      budgetSub = '\u043f\u043b\u0430\u043d \u00b7 '+(ads||0)+' \u043e\u0431\u044a\u044f\u0432\u043b.';
+    }
+
+    var ctrTotal = (shows && shows>0 && views!=null) ? +(views/shows*100).toFixed(2) : null;
+    var viewsSub = (ctrTotal!=null) ? ('CTR '+ctrTotal+'%') : '\u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u043e\u0432';
+
     var kpis=[
-      { val: total.budget[idx]!=null ? avitoFmtRub(total.budget[idx]) : '—', sub: 'бюджет · ' + (total.ads[idx]||0) + ' объявл.', label:'Бюджет' },
-      { val: fmt.format(total.shows[idx]||0), sub:'показов', label:'Показы' },
-      { val: fmt.format(total.views[idx]||0), sub:'просмотров', label:'Просмотры' },
-      { val: fmt.format(total.contacts[idx]||0), sub:'запросов · '+(total.chat[idx]||0)+' в чат', label:'Контакты' },
-      { val: avitoFmtRub(total.price_contact[idx]), sub:'за один контакт', label:'Цена контакта' },
+      { val: budgetVal, sub: budgetSub, label:'\u0411\u044e\u0434\u0436\u0435\u0442' },
+      { val: fmt.format(shows||0), sub:'\u043f\u043e\u043a\u0430\u0437\u043e\u0432', label:'\u041f\u043e\u043a\u0430\u0437\u044b' },
+      { val: fmt.format(views||0), sub:viewsSub, label:'\u041f\u0440\u043e\u0441\u043c\u043e\u0442\u0440\u044b' },
+      { val: fmt.format(contacts||0), sub:'\u0437\u0430\u043f\u0440\u043e\u0441\u043e\u0432', label:'\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u044b' },
+      { val: avitoFmtRub(pcontact), sub:'\u0437\u0430 \u043e\u0434\u0438\u043d \u043a\u043e\u043d\u0442\u0430\u043a\u0442', label:'\u0426\u0435\u043d\u0430 \u043a\u043e\u043d\u0442\u0430\u043a\u0442\u0430' },
     ];
     var html='';
     kpis.forEach(function(k){
@@ -798,68 +844,72 @@
     });
     document.getElementById('avito-kpis').innerHTML=html;
 
-    // график: CTR (показ→просмотр, %) + запросы контактов (шт)
-    var labels=total.months.map(shortMonth);
-    var ctrData = total.months.map(function(_, i){
-      var sh=total.shows[i], vw=total.views[i];
+    var labels=av.months.map(shortMonth);
+    var showsArr = (av.metrics.shows && av.metrics.shows.total) || [];
+    var viewsArr = (av.metrics.views && av.metrics.views.total) || [];
+    var contactsArr = (av.metrics.contacts && av.metrics.contacts.total) || [];
+
+    var ctrData = av.months.map(function(_, i){
+      var sh=showsArr[i], vw=viewsArr[i];
       if(!sh || sh<=0 || vw==null) return null;
       return +(vw/sh*100).toFixed(2);
     });
-    var contactsData = total.months.map(function(_, i){
-      var ct=total.contacts[i];
+    var contactsData = av.months.map(function(_, i){
+      var ct=contactsArr[i];
       return (ct==null||ct===0) ? null : ct;
     });
 
     if(avitoChart) avitoChart.destroy();
     avitoChart=new Chart(document.getElementById('avitoChart'),{
       data:{labels:labels, datasets:[
-        {type:'bar',label:'Запросы контактов',data:contactsData,backgroundColor:'#d97706cc',borderRadius:5,maxBarThickness:36,yAxisID:'y1',order:2},
-        {type:'line',label:'CTR (показ → просмотр), %',data:ctrData,borderColor:'#6366f1',backgroundColor:'#6366f1',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1,spanGaps:true}
+        {type:'bar',label:'\u0417\u0430\u043f\u0440\u043e\u0441\u044b \u043a\u043e\u043d\u0442\u0430\u043a\u0442\u043e\u0432',data:contactsData,backgroundColor:'#d97706cc',borderRadius:5,maxBarThickness:36,yAxisID:'y1',order:2},
+        {type:'line',label:'CTR (\u043f\u043e\u043a\u0430\u0437 \u2192 \u043f\u0440\u043e\u0441\u043c\u043e\u0442\u0440), %',data:ctrData,borderColor:'#6366f1',backgroundColor:'#6366f1',borderWidth:2.5,tension:.3,pointRadius:3,pointBackgroundColor:'#fff',pointBorderWidth:2,yAxisID:'y',order:1,spanGaps:true}
       ]},
       options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
         plugins:{legend:{display:true,position:'top',labels:{color:'#3a4150',font:{size:12},boxWidth:12,usePointStyle:true,pointStyle:'rectRounded'}},
           tooltip:{callbacks:{label:function(c){
-            if(c.dataset.yAxisID==='y') return '  '+c.dataset.label+': '+(c.raw==null?'—':c.raw+'%');
-            return '  '+c.dataset.label+': '+(c.raw==null?'—':fmt.format(c.raw));
+            if(c.dataset.yAxisID==='y') return '  '+c.dataset.label+': '+(c.raw==null?'\u2014':c.raw+'%');
+            return '  '+c.dataset.label+': '+(c.raw==null?'\u2014':fmt.format(c.raw));
           }}}},
         scales:{
           y:{position:'left',grid:{color:'#eef0f4'},border:{display:false},beginAtZero:true,title:{display:true,text:'CTR, %',color:'#6366f1',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},callback:function(v){return v+'%';}}},
-          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,title:{display:true,text:'Контактов',color:'#d97706',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},precision:0}},
+          y1:{position:'right',grid:{display:false},border:{display:false},beginAtZero:true,title:{display:true,text:'\u041a\u043e\u043d\u0442\u0430\u043a\u0442\u043e\u0432',color:'#d97706',font:{size:11}},ticks:{color:'#8a91a0',font:{size:11},precision:0}},
           x:{grid:{display:false},border:{display:false},ticks:{color:'#8a91a0',font:{size:11}}}
         }}
     });
     hideLoader('avito-loader');
 
-    // таблица регионов за тот же idx-й месяц
-    var regions=av.regions||[];
-    // считаем валидные регионы (показы>0 или контакты>0)
-    var rows=regions.map(function(r){
-      var sh=(r.shows||[])[idx], vw=(r.views||[])[idx], ct=(r.contacts||[])[idx], pr=(r.price_contact||[])[idx];
-      var conv = (sh && sh>0 && ct!=null) ? (ct/sh*100) : null;
-      return {name:r.name, shows:sh, views:vw, contacts:ct, price:pr, conv:conv};
+    // Таблица регионов: список ключей берём из shows.breakdown (самый полный)
+    var showsBd = (av.metrics.shows && av.metrics.shows.breakdown) || {};
+    var rows = Object.keys(showsBd).map(function(name){
+      var sh = avitoBd(av,'shows',name,idx);
+      var vw = avitoBd(av,'views',name,idx);
+      var ct = avitoBd(av,'contacts',name,idx);
+      var pr = avitoBd(av,'price_contact',name,idx);
+      var ctr = (sh && sh>0 && vw!=null) ? +(vw/sh*100).toFixed(2) : null;
+      return {name:name, shows:sh, views:vw, contacts:ct, price:pr, ctr:ctr};
     }).filter(function(r){ return (r.shows && r.shows>0) || (r.contacts && r.contacts>0); });
-    // сортируем по показам
     rows.sort(function(a,b){return (b.shows||0)-(a.shows||0);});
 
     var tb='';
     if(!rows.length){
-      tb='<tr><td colspan="6" style="text-align:center;color:var(--ink-4);padding:22px 10px">нет данных за этот месяц</td></tr>';
+      tb='<tr><td colspan="6" style="text-align:center;color:var(--ink-4);padding:22px 10px">\u043d\u0435\u0442 \u0434\u0430\u043d\u043d\u044b\u0445 \u0437\u0430 \u044d\u0442\u043e\u0442 \u043c\u0435\u0441\u044f\u0446</td></tr>';
     } else {
       rows.forEach(function(r){
-        var dot = r.name.indexOf('S2')===0 ? '#2f6bff' : '#16a34a';
-        var convCell='—', convCls='';
-        if(r.conv!=null){
-          var v=r.conv;
-          convCls = v>=0.05 ? 'hot' : (v>=0.02 ? 'warm' : 'cold');
-          convCell = (v<0.01?v.toFixed(3):v.toFixed(2))+'%';
+        var model=avitoModel(r.name);
+        var dot = model==='S2' ? '#2f6bff' : (model==='T8' ? '#16a34a' : '#8a91a0');
+        var ctrCell='\u2014', ctrCls='';
+        if(r.ctr!=null){
+          ctrCls = r.ctr>=15 ? 'hot' : (r.ctr>=8 ? 'warm' : 'cold');
+          ctrCell = r.ctr+'%';
         }
         tb+='<tr>'+
           '<td><span class="rname"><span class="rdot" style="background:'+dot+'"></span>'+r.name+'</span></td>'+
-          '<td class="rnum">'+(r.shows!=null?fmt.format(r.shows):'—')+'</td>'+
-          '<td class="rnum">'+(r.views!=null?fmt.format(r.views):'—')+'</td>'+
-          '<td class="rnum">'+(r.contacts!=null?fmt.format(r.contacts):'—')+'</td>'+
+          '<td class="rnum">'+(r.shows!=null?fmt.format(r.shows):'\u2014')+'</td>'+
+          '<td class="rnum">'+(r.views!=null?fmt.format(r.views):'\u2014')+'</td>'+
+          '<td class="rnum">'+(r.contacts!=null?fmt.format(r.contacts):'\u2014')+'</td>'+
           '<td class="rnum">'+avitoFmtRub(r.price)+'</td>'+
-          '<td class="rpct '+convCls+'">'+convCell+'</td>'+
+          '<td class="rpct '+ctrCls+'">'+ctrCell+'</td>'+
           '</tr>';
       });
     }
