@@ -337,6 +337,23 @@
       </div>
     </div>
 
+    <!-- 3.5. Динамика воронки — из накопленных снимков Битрикса -->
+    <div class="panel" style="margin-bottom:16px">
+      <div class="panel-head">
+        <h2>Динамика воронки</h2>
+        <div style="display:flex;gap:10px;align-items:center">
+          <div class="chan-switch" id="snap-entity">
+            <button data-e="leads" class="active">Лиды</button>
+            <button data-e="deals">Сделки</button>
+          </div>
+          <select id="snap-month" class="source-filter"></select>
+        </div>
+      </div>
+      <div class="kpis kpis-5" id="snap-kpis"></div>
+      <div class="chart-box" style="height:260px;margin-top:14px"><div class="loader" id="snap-loader">загружаю аналитику снимков</div><canvas id="snapChart"></canvas></div>
+      <div id="snap-deleted" style="margin-top:14px"></div>
+    </div>
+
     <!-- 4. Источники лидов — откуда идёт поток -->
     <div class="panel" style="margin-bottom:16px">
       <div class="panel-head">
@@ -1607,6 +1624,127 @@
     .then(function(r){ if(!r.ok) throw 0; return r.json(); })
     .then(function(j){ BOT=j; renderBot(); })
     .catch(function(){ renderBot(); }); // нет файла — покажет "нет данных"
+
+  // ===== ДИНАМИКА ВОРОНКИ (snapshots_analytics.json) =====
+  var SNAP=null, snapEntity='leads', snapMonth=null, snapChart=null;
+
+  var SNAP_STAGE_COLORS = {
+    'Связь установлена':'#0891b2', 'Квалификация':'#0e9488', 'Успех (в сделку)':'#16a34a',
+    'Лиды':'#2f6bff', 'Квалифицированы':'#7c3aed', 'КП / переговоры':'#d97706',
+    'Договор':'#16a34a', 'Выиграна':'#0891b2'
+  };
+
+  function snapDisplayStep(name){
+    var m = {'Лиды':'Квалифицированные лиды', 'Выиграна':'Договор подписан'};
+    return m[name] || name;
+  }
+
+  function renderSnap(){
+    if(!SNAP){ return; }
+    var byMonth = snapEntity==='leads' ? SNAP.leads_by_month : SNAP.deals_by_month;
+    var order = snapEntity==='leads' ? SNAP.lead_order : SNAP.deal_order;
+    var months = SNAP.months || [];
+
+    // селектор месяца
+    var sel = document.getElementById('snap-month');
+    if(sel && !sel.dataset.filled){
+      var opts = months.slice().reverse().map(function(mk){
+        return '<option value="'+mk+'">'+(SNAP.month_labels[mk]||mk)+'</option>';
+      });
+      sel.innerHTML = opts.join('');
+      sel.dataset.filled = '1';
+      sel.addEventListener('change', function(){ snapMonth=this.value; renderSnap(); });
+      if(!snapMonth && months.length) snapMonth = months[months.length-1];
+    }
+    if(!snapMonth && months.length) snapMonth = months[months.length-1];
+
+    var m = (byMonth && snapMonth) ? byMonth[snapMonth] : null;
+    if(!m){
+      document.getElementById('snap-kpis').innerHTML = '<div style="color:var(--ink-4);padding:10px">нет данных за этот месяц</div>';
+      document.getElementById('snap-deleted').innerHTML = '';
+      hideLoader('snap-loader');
+      return;
+    }
+
+    // KPI карточки
+    var entityLabel = snapEntity==='leads' ? 'лидов' : 'сделок';
+    var deletedColor = m.deleted_count > 0 ? 'var(--red)' : 'var(--ink)';
+    var kpis = [
+      {lab:'Новых '+entityLabel, val:m.new_count, sub:'создано в этом месяце'},
+      {lab:'Переходов', val:m.moves_count, sub:'смен стадий'},
+      {lab:'Застряло', val:m.stuck_count, sub:'без переходов за месяц'},
+      {lab:'Удалено', val:m.deleted_count, sub:m.deleted_count>0?'пропало из Битрикса':'ничего не удалено', color: deletedColor},
+      {lab:'Всего движений', val:(m.new_count + m.moves_count), sub:'новых + переходов'}
+    ];
+    document.getElementById('snap-kpis').innerHTML = kpis.map(function(k){
+      var col = k.color ? ' style="color:'+k.color+'"' : '';
+      return '<div class="kpi"><div class="k-lab">'+k.lab+'</div>'+
+        '<div class="k-val"'+col+'>'+fmt.format(k.val)+'</div>'+
+        '<div class="k-sub"><span class="muted">'+k.sub+'</span></div></div>';
+    }).join('');
+
+    // График: наполнение стадий по дням
+    var byDay = m.stages_by_day || [];
+    var labels = byDay.map(function(x){ return x.date.slice(5); });
+    var datasets = order.map(function(stage, i){
+      return {
+        label: snapDisplayStep(stage),
+        data: byDay.map(function(x){ return x[stage] || 0; }),
+        borderColor: SNAP_STAGE_COLORS[stage] || '#8a91a0',
+        backgroundColor: (SNAP_STAGE_COLORS[stage] || '#8a91a0')+'22',
+        tension: 0.3, borderWidth: 2, pointRadius: 2, fill: false
+      };
+    });
+
+    if(snapChart) snapChart.destroy();
+    if(labels.length){
+      snapChart = new Chart(document.getElementById('snapChart'), {
+        type:'line',
+        data:{labels:labels, datasets:datasets},
+        options:{responsive:true, maintainAspectRatio:false, interaction:{mode:'index',intersect:false},
+          plugins:{legend:{display:true, position:'top', labels:{color:'#3a4150', font:{size:11}, boxWidth:12, usePointStyle:true, pointStyle:'rectRounded'}},
+            tooltip:{callbacks:{label:function(c){ return '  '+c.dataset.label+': '+fmt.format(c.raw); }}}},
+          scales:{
+            y:{grid:{color:'#eef0f4'}, border:{display:false}, beginAtZero:true, ticks:{color:'#8a91a0', font:{size:11}, precision:0}},
+            x:{grid:{display:false}, border:{display:false}, ticks:{color:'#8a91a0', font:{size:11}}}
+          }}
+      });
+    } else {
+      var c = document.getElementById('snapChart').getContext('2d');
+      c.clearRect(0,0,999,999); c.font='13px Inter'; c.fillStyle='#8a91a0'; c.textAlign='center';
+      c.fillText('нет снимков за этот месяц', 300, 100);
+    }
+    hideLoader('snap-loader');
+
+    // Список удалённых
+    var delHost = document.getElementById('snap-deleted');
+    if(m.deleted_list && m.deleted_list.length){
+      var rows = m.deleted_list.map(function(d){
+        return '<tr><td>'+d.id+'</td><td>'+(d.title||'—')+'</td><td>'+snapDisplayStep(d.last_stage||'')+'</td><td>'+(d.last_seen||'')+'</td></tr>';
+      }).join('');
+      delHost.innerHTML = '<details style="border:1px solid var(--red-soft);border-radius:10px;padding:10px 14px;background:var(--red-soft)">'+
+        '<summary style="cursor:pointer;font-size:13px;font-weight:600;color:var(--red)">Удалено '+m.deleted_count+' — показать список</summary>'+
+        '<table class="lead-table" style="margin-top:10px"><thead><tr><th>ID</th><th>Название</th><th>Была на стадии</th><th>Последний раз видели</th></tr></thead><tbody>'+rows+'</tbody></table>'+
+        '</details>';
+    } else {
+      delHost.innerHTML = '';
+    }
+  }
+
+  document.getElementById('snap-entity').addEventListener('click', function(e){
+    var b = e.target.closest('button'); if(!b) return;
+    snapEntity = b.dataset.e;
+    this.querySelectorAll('button').forEach(function(x){ x.classList.toggle('active', x===b); });
+    renderSnap();
+  });
+
+  fetch('snapshots_analytics.json', {cache:'no-store'})
+    .then(function(r){ if(!r.ok) throw 0; return r.json(); })
+    .then(function(j){ SNAP=j; renderSnap(); })
+    .catch(function(){
+      hideLoader('snap-loader');
+      document.getElementById('snap-kpis').innerHTML = '<div style="color:var(--ink-4);padding:10px;font-size:13px">snapshots_analytics.json не найден — сначала запусти analyze_snapshots.py</div>';
+    });
 </script>
 </body>
 </html>
